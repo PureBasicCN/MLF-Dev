@@ -49,7 +49,7 @@ Global PBFileName.s, PathPart.s, FilePart.s, ExtPart.s
 
 ;-Application Summary
 Declare   Start()                 ;Fonts, Window and Triggers
-
+Declare   ResetWindow()           ;Init and clear Gadget
 Declare   PBSelect()              ;Changed lang
 Declare   ASMCreate()             ;Created ASM file, Parsed and modified ASM file and create description (DESC) file 
 Declare   OBJCreate()             ;Created OBJ file         
@@ -89,11 +89,9 @@ Procedure Start()
   ;Action
   ButtonGadget(#mfPBSelect, WindowWidth(#mf) - 100, 49, 80, 24, "Select")
   ButtonGadget(#mfPBCompil, 20, 80, 80, 24, "Create ASM")
-  DisableGadget(#mfPBCompil, #True)
   ButtonGadget(#mfASMCompil, 110, 80, 80, 24, "Create OBJ")
   DisableGadget(#mfASMCompil, #True)
   ButtonGadget(#mfLIBCompil, 200, 80, 80, 24, "Create LIB")
-  DisableGadget(#mfLIBCompil, #True)
     
   ;View console log
   ListViewGadget(#mfLog, 5, 130, WindowWidth(#mf) - 15, 400, #PB_Editor_ReadOnly)
@@ -117,8 +115,11 @@ Procedure Start()
   EditorGadget(#mfDESCEdit, 5, 35, WindowWidth(#mf) - 15, 460)
   SetGadgetColor(#mfDESCEdit, #PB_Gadget_BackColor, RGB(211, 211, 211))
   ButtonGadget(#mfDESCUpdate, WindowWidth(#mf) - 90, 500, 80, 22, m("save"))
+  
   CloseGadgetList()
   
+  ResetWindow()
+    
   ;-Triggers
   BindGadgetEvent(#mfLang, @LangChange())           ;Change lang
   BindGadgetEvent(#mfPBSelect, @PBSelect())         ;Select PureBasic code
@@ -131,6 +132,14 @@ Procedure Start()
   Repeat : WaitWindowEvent() : ForEver
 EndProcedure
 
+Procedure ResetWindow()
+  DisableGadget(#mfPBCompil, #True)
+  DisableGadget(#mfLIBCompil, #True)
+  DisableGadget(#mfASMEdit, #True)
+  DisableGadget(#mfDESCEdit, #True)
+  DisableGadget(#mfDESCUpdate, #True)
+EndProcedure
+
 ;-
 ;Select PureBasic filename
 Procedure PBSelect()
@@ -139,7 +148,7 @@ Procedure PBSelect()
     PathPart = GetPathPart(PBFileName)
     FilePart = GetFilePart(PBFileName)
     ExtPart  = GetExtensionPart(PBFileName)
-    
+    ResetWindow()    
     SetGadgetText(#mfPBCodeName, " " + PBFileName)
     DisableGadget(#mfPBCompil, #False)
     ConsoleLog("Click the Create ASM button.") 
@@ -201,7 +210,7 @@ Procedure ASMCreate()
   
   ;Compile PB -> ASM 
   ConsoleLog("Waiting for compile ...")
-  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED" , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /commented " , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
     While ProgramRunning(Compiler)
       If AvailableProgramOutput(Compiler)
@@ -218,13 +227,14 @@ Procedure ASMCreate()
       ConsoleLog(m("libexist"))
       ConsoleLog(m("errordelete") + " " + Filename)
     Else
-      ConsoleLog("Rename PureBasic.asm to " + FileName)       
+      ConsoleLog("Rename PureBasic.asm to " + FileName + " done." )       
       
       ;Parse ASM (Extract dependancies & procedures and create DESC File) 
       Analyse(FileName)
       
-      ;Show ASM
+      ;Init ASM Editor
       SetGadgetText(#mFASMName, FileName)
+      DisableGadget(#mFASMEdit, #False)
       SetGadgetText(#mFASMEdit, "") ;Clear editor
       If ReadFile(0, Filename)
         While Eof(0) = 0
@@ -233,9 +243,10 @@ Procedure ASMCreate()
         CloseFile(0)
       EndIf
       
-      ;Show DESC
+      ;Init DESC editor
       FileName = LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "desc"  
       SetGadgetText(#mfDESCName, FileName)
+      DisableGadget(#mfDESCEdit, #False)
       SetGadgetText(#mfDESCEdit, "") ;Clear editor
       If ReadFile(0, Filename)
         While Eof(0) = 0
@@ -244,7 +255,9 @@ Procedure ASMCreate()
         CloseFile(0)
         ConsoleLog("You can view the ASM and DESC sources before create OBJ")
       EndIf
+      
       DisableGadget(#mfASMCompil, #False)
+      DisableGadget(#mfDESCUpdate, #False)
     EndIf 
   EndIf
 EndProcedure
@@ -284,7 +297,7 @@ Procedure DESCSave()
   EndIf  
 EndProcedure
 
-;Make Static Lib
+;Make Static Lib (Use sdk\LibraryMaker.exe")
 Procedure MakeStaticLib()  
   Protected Compiler
   Protected SourcePath.s      = #DQUOTE$ + LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "Desc" + #DQUOTE$
@@ -339,9 +352,10 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 4
+; CursorPosition = 269
+; FirstLine = 265
 ; Folding = ------
-; Markers = 53,122
+; Markers = 53,123
 ; EnableXP
 ; EnableAdmin
 ; Executable = mlf.exe
