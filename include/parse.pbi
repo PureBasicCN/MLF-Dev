@@ -186,7 +186,7 @@ Procedure Parse(Buffer.s)
             If DefaultValue
               EnumProcedures + "[Float], "
             Else
-              EnumProcedures + "[Float], "
+              EnumProcedures + "Float, "
             EndIf
             
           Case "q"
@@ -232,7 +232,7 @@ Procedure Parse(Buffer.s)
   EndIf
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 136
-; FirstLine = 130
+; CursorPosition = 211
+; FirstLine = 157
 ; Folding = ----
 ; EnableXP
