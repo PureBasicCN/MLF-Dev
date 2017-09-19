@@ -143,7 +143,7 @@ EndProcedure
 ;-
 ;Select PureBasic filename
 Procedure PBSelect()
-  PBFileName = OpenFileRequester(m("selpbfile"), "", "PB file | *.pb", 0)  
+  PBFileName = OpenFileRequester(m("selpbfile"), "", "PureBasic file | *.pb;*.pbi", 0)  
   If PBFileName
     PathPart = GetPathPart(PBFileName)
     FilePart = GetFilePart(PBFileName)
@@ -210,7 +210,7 @@ Procedure ASMCreate()
   
   ;Compile PB -> ASM 
   ConsoleLog("Waiting for compile ...")
-  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /commented " , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED" , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
     While ProgramRunning(Compiler)
       If AvailableProgramOutput(Compiler)
@@ -236,7 +236,7 @@ Procedure ASMCreate()
       SetGadgetText(#mFASMName, FileName)
       DisableGadget(#mFASMEdit, #False)
       SetGadgetText(#mFASMEdit, "") ;Clear editor
-      If ReadFile(0, Filename)
+      If ReadFile(0, Filename, #PB_Ascii)
         While Eof(0) = 0
           AddGadgetItem(#mfASMEdit, -1, ReadString(0))
         Wend
@@ -244,7 +244,7 @@ Procedure ASMCreate()
       EndIf
       
       ;Init DESC editor
-      FileName = LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "desc"  
+      FileName = LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "desc"
       SetGadgetText(#mfDESCName, FileName)
       DisableGadget(#mfDESCEdit, #False)
       SetGadgetText(#mfDESCEdit, "") ;Clear editor
@@ -301,7 +301,7 @@ EndProcedure
 Procedure MakeStaticLib()  
   Protected Compiler
   Protected SourcePath.s      = #DQUOTE$ + LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "Desc" + #DQUOTE$
-  Protected DestinationPath.s = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + #DQUOTE$  
+  Protected DestinationPath.s = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + #DQUOTE$  ; + " /COMPRESSED "
   
   Compiler = RunProgram(#PB_Compiler_Home + "sdk\LibraryMaker.exe", SourcePath + " /TO " + DestinationPath, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   
@@ -352,10 +352,9 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 269
-; FirstLine = 265
+; CursorPosition = 47
+; FirstLine = 27
 ; Folding = ------
-; Markers = 53,123
 ; EnableXP
 ; EnableAdmin
 ; Executable = mlf.exe
