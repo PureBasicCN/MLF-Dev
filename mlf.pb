@@ -1,4 +1,4 @@
-﻿;MLF - Make Library Factory - 0.5 Alpha 
+﻿;MLF - Make Library Factory 
 
 ;Contributor    : falsam
 
@@ -239,8 +239,8 @@ EndProcedure
 ;Create OBJ File
 Procedure OBJCreate()
   Protected Compiler
-  Protected ASMFilename.s = #DQUOTE$ + LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "asm" + #DQUOTE$
-  Protected OBJFileName.s = #DQUOTE$ + LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "obj" + #DQUOTE$
+  Protected ASMFilename.s = #DQUOTE$ + FilePart + ".asm" + #DQUOTE$
+  Protected OBJFileName.s = #DQUOTE$ + FilePart + ".obj" + #DQUOTE$
     
   Compiler = RunProgram(#PB_Compiler_Home + "Compilers\FAsm.exe", "" + ASMFilename + " " + OBJFileName, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
@@ -256,7 +256,7 @@ EndProcedure
 
 ;Save DESC file if the user changes the source 
 Procedure DESCSave()
-  Protected DESCFileName.s = LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "desc"
+  Protected DESCFileName.s = FilePart + ".desc"
   Protected DESCContent.s = GetGadgetText(#mfDESCEdit)
   
   If CreateFile(0, DESCFileName)
@@ -274,7 +274,7 @@ EndProcedure
 ;Make Static Lib (Use sdk\LibraryMaker.exe")
 Procedure MakeStaticLib()  
   Protected Compiler
-  Protected SourcePath.s      = #DQUOTE$ + LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "Desc" + #DQUOTE$
+  Protected SourcePath.s      = #DQUOTE$ + FilePart + ".Desc" + #DQUOTE$
   Protected DestinationPath.s = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + #DQUOTE$  ; + " /COMPRESSED "
   
   Compiler = RunProgram(#PB_Compiler_Home + "sdk\LibraryMaker.exe", SourcePath + " /TO " + DestinationPath, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
@@ -340,8 +340,6 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 232
-; FirstLine = 238
 ; Folding = -----
 ; EnableXP
 ; EnableAdmin
