@@ -19,8 +19,7 @@ Procedure Analyse(ASMFileName.s)
       Buffer = ReadString(0)
       If FindString(Buffer, "; procedure", 0, #PB_String_NoCase) And Not FindString(Buffer, "; procedurereturn", 0, #PB_String_NoCase)
         Token = #True
-        ;Normalize 
-                
+        ;Normalize        
         Repeat 
           Buffer = ReplaceString(Buffer, "  ", " ")
         Until FindString(Buffer, "  ") = 0        
@@ -107,7 +106,6 @@ Procedure Parse(Buffer.s)
   Protected Name.s, Parameters.s, Variable.s, DefaultValue.b, ReturnValue.s, n 
   
   Buffer = Trim(Mid(Buffer, 2, Len(Buffer)))
-  Debug Buffer
   
   Select LCase(StringField(StringField(Buffer, 1, " "), 1, "."))
     Case "proceduredll", "procedurecdll"
@@ -134,7 +132,6 @@ Procedure Parse(Buffer.s)
       
       ;-Extract procedure name
       EnumProcedures + Trim(StringField(Buffer, 1, "(")) + ", "
-      Debug EnumProcedures
       ;Parameter type
       ; (ok) Byte: The parameter will be a byte (1 byte)
       ; (ok) Word: The parameter will be a word (2 bytes)
@@ -211,7 +208,15 @@ Procedure Parse(Buffer.s)
             EndIf
             
           Default
-            If FindString(Variable, "Array", 0, #PB_String_NoCase)
+            
+            If FindString(Variable, "$")
+              If DefaultValue
+                EnumProcedures + "[String],"
+              Else
+                EnumProcedures + "String,"
+              EndIf
+              
+            ElseIf FindString(Variable, "Array", 0, #PB_String_NoCase)
               EnumProcedures + "Array, "
               
             ElseIf Not FindString(ReturnValue, "none", 0, #PB_String_NoCase)
@@ -232,7 +237,7 @@ Procedure Parse(Buffer.s)
   EndIf
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 211
-; FirstLine = 157
-; Folding = ----
+; CursorPosition = 235
+; FirstLine = 150
+; Folding = -----
 ; EnableXP
