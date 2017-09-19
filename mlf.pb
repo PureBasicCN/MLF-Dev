@@ -27,8 +27,7 @@ Enumeration Gadget
   #mfPBCodeName
   #mfPBSelect
   #mfPBCompil
-  #mfASMCompil
-  #mfLIBCompil
+  #mfLibCreate
   #mfLibShow
   #mfLog
   
@@ -92,9 +91,9 @@ Procedure Start()
   ;Action
   ButtonGadget(#mfPBSelect, WindowWidth(#mf) - 100, 49, 80, 24, "Select")
   ButtonGadget(#mfPBCompil, 20, 80, 80, 24, "Compil")
-  ButtonGadget(#mfASMCompil, 110, 80, 80, 24, "Create OBJ")
-  DisableGadget(#mfASMCompil, #True)
-  ButtonGadget(#mfLIBCompil, 200, 80, 80, 24, "Create LIB")
+  ButtonGadget(#mfLibCreate, 110, 80, 80, 24, "Create Library")
+  DisableGadget(#mfLibCreate, #True)
+
   ButtonGadget(#mfLibShow, 290, 80, 120, 24, "Show User Libray") 
     
   ;View console log
@@ -128,10 +127,10 @@ Procedure Start()
   BindGadgetEvent(#mfLang, @LangChange())           ;Change lang
   BindGadgetEvent(#mfPBSelect, @PBSelect())         ;Select PureBasic code
   BindGadgetEvent(#mfPBCompil, @ASMCreate())        ;Create ASM file, Parsed and modified ASM file and create description (DESC) file 
-  BindGadgetEvent(#mfASMCompil, @OBJCreate())       ;Create OBJ file
+  BindGadgetEvent(#mfLibCreate, @OBJCreate())       ;Create OBJ file and User Libray
   BindGadgetEvent(#mfDESCUpdate, @DESCSave())       ;Save DESC file if the user changes the source 
-  BindGadgetEvent(#mfLIBCompil, @MakeStaticLib())   ;Create User libray
-  BindGadgetEvent(#mfLibShow, @LIBShowUserLib())     ;Show user library folder
+
+  BindGadgetEvent(#mfLibShow, @LIBShowUserLib())    ;Show user library folder
   BindEvent(#PB_Event_CloseWindow, @Exit())         ;Exit
   
   Repeat : WaitWindowEvent() : ForEver
@@ -139,7 +138,6 @@ EndProcedure
 
 Procedure ResetWindow()
   DisableGadget(#mfPBCompil, #True)
-  DisableGadget(#mfLIBCompil, #True)
   DisableGadget(#mfASMEdit, #True)
   DisableGadget(#mfDESCEdit, #True)
   DisableGadget(#mfDESCUpdate, #True)
@@ -156,7 +154,7 @@ Procedure PBSelect()
     ResetWindow()    
     SetGadgetText(#mfPBCodeName, " " + PBFileName)
     DisableGadget(#mfPBCompil, #False)
-    ConsoleLog("Click the Create ASM button.") 
+    ConsoleLog("Click the Compil button.") 
   EndIf
 EndProcedure
 
@@ -172,7 +170,7 @@ Procedure ASMCreate()
  
   ;Delete previous library 
   FileName = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + FilePart + #DQUOTE$
-  FileDelete(FileName)
+  FileDelete(FileName) ;- Does not work
     
   ;Delete previous PureLibrariesMaker.log
   FileDelete("PureLibrariesMaker.log")
@@ -230,7 +228,7 @@ Procedure ASMCreate()
         ConsoleLog("You can view the ASM and DESC sources before create OBJ")
       EndIf
       
-      DisableGadget(#mfASMCompil, #False)
+      DisableGadget(#mfLibCreate, #False)
       DisableGadget(#mfDESCUpdate, #False)
     EndIf 
   EndIf
@@ -250,7 +248,8 @@ Procedure OBJCreate()
       EndIf
     Wend
     CloseProgram(Compiler) 
-    DisableGadget(#mfLIBCompil, #False)
+    ;DisableGadget(#mfLIBCompil, #False)
+    MakeStaticLib()
   EndIf
 EndProcedure
 
@@ -340,6 +339,8 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 230
+; FirstLine = 202
 ; Folding = -----
 ; EnableXP
 ; EnableAdmin
