@@ -9,10 +9,6 @@
 
 EnableExplicit
 
-IncludePath "include"
-IncludeFile "catalog.pbi"
-IncludeFile "parse.pbi"
-
 Enumeration Font
   #FontGlobal  
   #FontH1
@@ -33,10 +29,11 @@ Enumeration Gadget
   #mfPBCompil
   #mfASMCompil
   #mfLIBCompil
+  #mfLibShow
   #mfLog
   
   ;Panel 1
-  #mFASMName
+  #mfASMName
   #mfASMEdit
   
   ;Panel 2 
@@ -55,12 +52,18 @@ Declare   ASMCreate()             ;Created ASM file, Parsed and modified ASM fil
 Declare   OBJCreate()             ;Created OBJ file         
 Declare   DESCSave()              ;Saved DESC file if the user changes the source 
 Declare   MakeStaticLib()         ;Create User libray
+Declare   LibShowUserLib()        ;Show user library folder
 
 Declare   LangChange()            ;Changed lang (French, English)
 Declare   ConsoleLog(Buffer.s)    ;Updated console log  
 Declare.f AdjustFontSize(Size.l)  ;Load a font and adapt it to the DPI
+Declare   FileDelete(FileName.s)  ;Delete file
 
 Declare   Exit()                  ;Exit
+
+IncludePath "include"
+IncludeFile "catalog.pbi"
+IncludeFile "parse.pbi"
 
 Start()
 
@@ -88,10 +91,11 @@ Procedure Start()
   
   ;Action
   ButtonGadget(#mfPBSelect, WindowWidth(#mf) - 100, 49, 80, 24, "Select")
-  ButtonGadget(#mfPBCompil, 20, 80, 80, 24, "Create ASM")
+  ButtonGadget(#mfPBCompil, 20, 80, 80, 24, "Compil")
   ButtonGadget(#mfASMCompil, 110, 80, 80, 24, "Create OBJ")
   DisableGadget(#mfASMCompil, #True)
   ButtonGadget(#mfLIBCompil, 200, 80, 80, 24, "Create LIB")
+  ButtonGadget(#mfLibShow, 290, 80, 120, 24, "Show User Libray") 
     
   ;View console log
   ListViewGadget(#mfLog, 5, 130, WindowWidth(#mf) - 15, 400, #PB_Editor_ReadOnly)
@@ -101,9 +105,9 @@ Procedure Start()
   
   ;View code ASM
   AddGadgetItem (#mfPanel, -1, m("viewasm"))
-  TextGadget(#mFASMName, 5, 10, WindowWidth(#mf) - 15, 22, "") 
-  SetGadgetFont(#mFASMName, FontID(#FontH1))
-  SetGadgetColor(#mFASMName, #PB_Gadget_BackColor, RGB(192, 192, 192))
+  TextGadget(#mfASMName, 5, 10, WindowWidth(#mf) - 15, 22, "") 
+  SetGadgetFont(#mfASMName, FontID(#FontH1))
+  SetGadgetColor(#mfASMName, #PB_Gadget_BackColor, RGB(192, 192, 192))
   EditorGadget(#mfASMEdit, 5, 35, WindowWidth(#mf) - 15, 470)
   SetGadgetColor(#mfASMEdit, #PB_Gadget_BackColor, RGB(211, 211, 211))
   
@@ -127,6 +131,7 @@ Procedure Start()
   BindGadgetEvent(#mfASMCompil, @OBJCreate())       ;Create OBJ file
   BindGadgetEvent(#mfDESCUpdate, @DESCSave())       ;Save DESC file if the user changes the source 
   BindGadgetEvent(#mfLIBCompil, @MakeStaticLib())   ;Create User libray
+  BindGadgetEvent(#mfLibShow, @LIBShowUserLib())     ;Show user library folder
   BindEvent(#PB_Event_CloseWindow, @Exit())         ;Exit
   
   Repeat : WaitWindowEvent() : ForEver
@@ -146,7 +151,7 @@ Procedure PBSelect()
   PBFileName = OpenFileRequester(m("selpbfile"), "", "PureBasic file | *.pb;*.pbi", 0)  
   If PBFileName
     PathPart = GetPathPart(PBFileName)
-    FilePart = GetFilePart(PBFileName)
+    FilePart = GetFilePart(PBFileName, #PB_FileSystem_NoExtension)
     ExtPart  = GetExtensionPart(PBFileName)
     ResetWindow()    
     SetGadgetText(#mfPBCodeName, " " + PBFileName)
@@ -159,55 +164,25 @@ EndProcedure
 Procedure ASMCreate()
   Protected Compiler, Buffer.s, FileName.s
   
-  ;Delete previous library
-  FileName = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + LSet(FilePart, Len(FilePart) - Len(ExtPart)-1) + #DQUOTE$
-  If ReadFile(0, FileName)
-    CloseFile(0)
-    ConsoleLog("Delete previous LIB file")
-    If Not DeleteFile(FileName, #PB_FileSystem_Force)
-      ConsoleLog(m("errordelete") + " " + Filename)
-    EndIf
-  EndIf
-  
-  ;Delete previous PureLibrariesMaker.log
-  FileName = "PureLibrariesMaker.log" 
-  If ReadFile(0, FileName)
-    CloseFile(0)
-    If Not DeleteFile(FileName, #PB_FileSystem_Force)
-      ConsoleLog(m("errordelete") + " " + Filename)
-    EndIf
-  EndIf    
-  
-  ;Delete YOUR previous ASM Files if exist
-  FileName = LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "asm" 
-  If ReadFile(0, FileName)
-    CloseFile(0)
-    ConsoleLog("Delete your previous ASM file")
-    If Not DeleteFile(FileName, #PB_FileSystem_Force)
-      ConsoleLog(m("errordelete") + " " + Filename)
-    EndIf
-  EndIf    
-  
   ;Delete previous PureBasic.exe file if exist
-  FileName = "PureBasic.exe" 
-  If ReadFile(0, FileName)
-    CloseFile(0)
-    ConsoleLog("Delete previous PureBasic.exe")
-    If Not DeleteFile(FileName, #PB_FileSystem_Force)
-      ConsoleLog(m("errordelete") + " " + Filename)
-    EndIf
-  EndIf    
+  FileDelete("PureBasic.exe")
   
   ;Delete previous PureBasic.asm file if exist
-  FileName = "PureBasic.asm" 
-  If ReadFile(0, FileName)
-    CloseFile(0)
-    ConsoleLog("Delete previous purebasic.asm")
-    If Not DeleteFile(FileName, #PB_FileSystem_Force)
-      ConsoleLog(m("errordelete") + " " + Filename)
-    EndIf
-  EndIf    
+  FileDelete("PureBasic.asm")
+ 
+  ;Delete previous library 
+  FileName = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + FilePart + #DQUOTE$
+  FileDelete(FileName)
+    
+  ;Delete previous PureLibrariesMaker.log
+  FileDelete("PureLibrariesMaker.log")
   
+  ;Delete YOUR previous ASM Files if exist
+  FileDelete(FilePart + ".asm")
+    
+  ;Delete previous PureBasic.desc file if exist
+  FileDelete(FilePart + ".desc")
+    
   ;Compile PB -> ASM 
   ConsoleLog("Waiting for compile ...")
   Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED" , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
@@ -220,9 +195,8 @@ Procedure ASMCreate()
       EndIf
     Wend
     CloseProgram(Compiler)
-    ;DeleteFile("PureBasic.exe", #PB_FileSystem_Force)
     
-    FileName = LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "asm"
+    FileName = FilePart + ".asm"
     If Not RenameFile("PureBasic.asm", Filename)
       ConsoleLog(m("libexist"))
       ConsoleLog(m("errordelete") + " " + Filename)
@@ -233,7 +207,7 @@ Procedure ASMCreate()
       Analyse(FileName)
       
       ;Init ASM Editor
-      SetGadgetText(#mFASMName, FileName)
+      SetGadgetText(#mfASMName, FileName)
       DisableGadget(#mFASMEdit, #False)
       SetGadgetText(#mFASMEdit, "") ;Clear editor
       If ReadFile(0, Filename, #PB_Ascii)
@@ -244,7 +218,7 @@ Procedure ASMCreate()
       EndIf
       
       ;Init DESC editor
-      FileName = LSet(FilePart, Len(FilePart) - Len(ExtPart)) + "desc"
+      FileName = FilePart + ".desc"
       SetGadgetText(#mfDESCName, FileName)
       DisableGadget(#mfDESCEdit, #False)
       SetGadgetText(#mfDESCEdit, "") ;Clear editor
@@ -323,6 +297,10 @@ Procedure MakeStaticLib()
   EndIf
 EndProcedure
 
+Procedure LibShowUserLib()
+  RunProgram("explorer.exe",#PB_Compiler_Home + "PureLibraries\UserLibraries", "")  
+EndProcedure
+
 ;-
 ;-Tools
 Procedure LangChange()
@@ -347,14 +325,24 @@ Procedure.f AdjustFontSize(Size.l)
   ProcedureReturn (Size * 96) / lPpp
 EndProcedure
 
+Procedure FileDelete(FileName.s)
+  If ReadFile(0, FileName)
+    CloseFile(0)
+    ConsoleLog("Delete " + Filename + " ...")
+    If Not DeleteFile(FileName, #PB_FileSystem_Force)
+      ConsoleLog(m("errordelete") + " " + Filename)
+    EndIf
+  EndIf
+EndProcedure
+
 ;-The end
 Procedure Exit()  
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 47
-; FirstLine = 27
-; Folding = ------
+; CursorPosition = 232
+; FirstLine = 238
+; Folding = -----
 ; EnableXP
 ; EnableAdmin
 ; Executable = mlf.exe
