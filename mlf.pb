@@ -248,7 +248,6 @@ Procedure OBJCreate()
       EndIf
     Wend
     CloseProgram(Compiler) 
-    ;DisableGadget(#mfLIBCompil, #False)
     MakeStaticLib()
   EndIf
 EndProcedure
@@ -339,8 +338,6 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 230
-; FirstLine = 202
 ; Folding = -----
 ; EnableXP
 ; EnableAdmin
