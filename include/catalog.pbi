@@ -1,7 +1,7 @@
 ﻿;MLF - Make Library Factory
 
 Global Title.s = "MLF"
-Global Version.s = "0.5 Beta"
+Global Version.s = "0.7 Alpha"
 
 Global Lang = 0 ;0 : Fr, 1, En
 
@@ -123,6 +123,6 @@ EndProcedure
 
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 22
+; CursorPosition = 3
 ; Folding = -
 ; EnableXP
