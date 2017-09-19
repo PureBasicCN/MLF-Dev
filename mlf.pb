@@ -79,7 +79,7 @@ Procedure Start()
   ComboBoxGadget(#mfLang, WindowWidth(#mf) - 90, 10, 80, 22)
   InitLang(#mfLang)
   
-  ;Wrapper
+  ;Wrapper Panel
   PanelGadget(#mfPanel, 0, 40, WindowWidth(#mf)+2, WindowHeight(#mf) - 40)
   AddGadgetItem (#mfPanel, -1, m("genasm"))
   FrameGadget(#mfPBFrame, 5, 20, WindowWidth(#mf) - 15, 100, m("selpbfile"))
@@ -118,6 +118,7 @@ Procedure Start()
   ButtonGadget(#mfDESCUpdate, WindowWidth(#mf) - 90, 500, 80, 22, m("save"))
   
   CloseGadgetList()
+  ;End Wrapper Panel
   
   ResetWindow()
     
@@ -337,8 +338,7 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 93
-; FirstLine = 72
+; CursorPosition = 151
 ; Folding = -----
 ; EnableXP
 ; EnableAdmin
