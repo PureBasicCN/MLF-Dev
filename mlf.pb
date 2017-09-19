@@ -27,7 +27,7 @@ Enumeration Gadget
   #mfPBCodeName
   #mfPBSelect
   #mfPBCompil
-  #mfLibCreate
+  #mfLIBCreate
   #mfLibShow
   #mfLog
   
@@ -90,11 +90,9 @@ Procedure Start()
   
   ;Action
   ButtonGadget(#mfPBSelect, WindowWidth(#mf) - 100, 49, 80, 24, "Select")
-  ButtonGadget(#mfPBCompil, 20, 80, 80, 24, "Compil")
-  ButtonGadget(#mfLibCreate, 110, 80, 80, 24, "Create Library")
-  DisableGadget(#mfLibCreate, #True)
-
-  ButtonGadget(#mfLibShow, 290, 80, 120, 24, "Show User Libray") 
+  ButtonGadget(#mfPBCompil, 20, 80, 100, 24, "Compil")
+  ButtonGadget(#mfLIBCreate, 130, 80, 100, 24, "Create Library")
+  ButtonGadget(#mfLibShow, 240, 80, 120, 24, "Show User Libray") 
     
   ;View console log
   ListViewGadget(#mfLog, 5, 130, WindowWidth(#mf) - 15, 400, #PB_Editor_ReadOnly)
@@ -127,7 +125,7 @@ Procedure Start()
   BindGadgetEvent(#mfLang, @LangChange())           ;Change lang
   BindGadgetEvent(#mfPBSelect, @PBSelect())         ;Select PureBasic code
   BindGadgetEvent(#mfPBCompil, @ASMCreate())        ;Create ASM file, Parsed and modified ASM file and create description (DESC) file 
-  BindGadgetEvent(#mfLibCreate, @OBJCreate())       ;Create OBJ file and User Libray
+  BindGadgetEvent(#mfLIBCreate, @OBJCreate())       ;Create OBJ file and User Libray
   BindGadgetEvent(#mfDESCUpdate, @DESCSave())       ;Save DESC file if the user changes the source 
 
   BindGadgetEvent(#mfLibShow, @LIBShowUserLib())    ;Show user library folder
@@ -138,6 +136,7 @@ EndProcedure
 
 Procedure ResetWindow()
   DisableGadget(#mfPBCompil, #True)
+  DisableGadget(#mfLIBCreate, #True)
   DisableGadget(#mfASMEdit, #True)
   DisableGadget(#mfDESCEdit, #True)
   DisableGadget(#mfDESCUpdate, #True)
@@ -225,10 +224,10 @@ Procedure ASMCreate()
           AddGadgetItem(#mfDESCEdit, -1, ReadString(0))
         Wend
         CloseFile(0)
-        ConsoleLog("You can view the ASM and DESC sources before create OBJ")
+        ConsoleLog("You can view the ASM and DESC sources before create your user library")
       EndIf
       
-      DisableGadget(#mfLibCreate, #False)
+      DisableGadget(#mfLIBCreate, #False)
       DisableGadget(#mfDESCUpdate, #False)
     EndIf 
   EndIf
@@ -338,6 +337,8 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 93
+; FirstLine = 72
 ; Folding = -----
 ; EnableXP
 ; EnableAdmin
