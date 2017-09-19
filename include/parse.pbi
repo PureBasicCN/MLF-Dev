@@ -6,6 +6,7 @@ Declare Analyse(ASMFileName.s)
 Declare Parse(Buffer.s)
 
 Procedure Analyse(ASMFileName.s)
+  Protected ProcedureName.s
   Protected ASMContent.s
   Protected DESCContent.s
   Protected Token
@@ -18,6 +19,12 @@ Procedure Analyse(ASMFileName.s)
       Buffer = ReadString(0)
       If FindString(Buffer, "; procedure", 0, #PB_String_NoCase) And Not FindString(Buffer, "; procedurereturn", 0, #PB_String_NoCase)
         Token = #True
+        ;Normalize 
+                
+        Repeat 
+          Buffer = ReplaceString(Buffer, "  ", " ")
+        Until FindString(Buffer, "  ") = 0        
+        
         ASMContent + Buffer + #CRLF$
         ;Insert public PB_YourProcedure() and PB_YourProcedure after the comment line ; ProcedureDL Yourprocedure
         
@@ -25,8 +32,10 @@ Procedure Analyse(ASMFileName.s)
         ; ProcedureDLL Add(x, y)
         ; public PB_Add
         ; PB_Add:
-        ASMContent + "public PB_" + StringField(StringField(Buffer, 3, " "), 1, "(") + #CRLF$
-        ASMContent + "PB_" + StringField(StringField(Buffer, 3, " "), 1, "(") + ":"+ #CRLF$ 
+        ProcedureName = StringField(StringField(Buffer, 3, " "), 1, "(")
+        
+        ASMContent + "public PB_" + ProcedureName + #CRLF$
+        ASMContent + "PB_" + ProcedureName + ":"+ #CRLF$ 
       Else
         If Token = #False
           ASMContent + Buffer + #CRLF$
@@ -37,19 +46,19 @@ Procedure Analyse(ASMFileName.s)
     Wend
     CloseFile(0)
   EndIf
-  
+    
   ;-Create ASM file
-  If CreateFile(0, "mylib.asm")
+  If CreateFile(0, ASMFileName)
     WriteString(0, ASMContent)
     CloseFile(0)
   EndIf
   
   ;-Compose DESC Header
-  EnumHeader = "ASM" + #CRLF$
-  EnumHeader + "0" + #CRLF$
-  EnumHeader + "OBJ" + #CRLF$
+  EnumHeader = "ASM" + #CRLF$   ; Langage used to code the library: ASM or C
+  EnumHeader + "0" + #CRLF$     ; Number of windows DLL than the library need
+  EnumHeader + "OBJ" + #CRLF$   ; Library type (Can be OBJ or LIB).  
   
-  ;-Extract and count dependancies
+  ;-Extract and count dependancies (Number of PureBasic library needed by the library.)
   If ReadFile(0, ASMFileName) 
     While Eof(0) = 0
       Buffer = ReadString(0)
@@ -87,18 +96,18 @@ Procedure Analyse(ASMFileName.s)
                 EnumProcedures
   
   ;-Create DESC file
-  If CreateFile(0, "mylib.Desc")
+  If CreateFile(0,  GetFilePart(ASMFileName, #PB_FileSystem_NoExtension) + ".desc")
     WriteString(0, DESCContent)
     CloseFile(0) 
   EndIf
 EndProcedure
 
-
 ;
 Procedure Parse(Buffer.s)
-  Protected Function.s, Variable.s, ReturnValue.s, n 
+  Protected Name.s, Parameters.s, Variable.s, DefaultValue.b, ReturnValue.s, n 
   
   Buffer = Trim(Mid(Buffer, 2, Len(Buffer)))
+  Debug Buffer
   
   Select LCase(StringField(StringField(Buffer, 1, " "), 1, "."))
     Case "proceduredll", "procedurecdll"
@@ -120,15 +129,12 @@ Procedure Parse(Buffer.s)
         ReturnValue = "None | StdCall"        
       EndIf
       
+      ;-Remove "ProcedureDLL"
       Buffer = Trim(Mid(Buffer, Len(Trim(StringField(Buffer, 1, " ")))+1))
       
-      Function = "(" + StringField(Buffer, 2, "(") 
-      
-      Buffer = RemoveString(Buffer, " ")
-      
-      ;-Extracti procedure name - Extraction du nom de la procedure
-      EnumProcedures + StringField(Buffer, 1, "(") + ", "
-      
+      ;-Extract procedure name
+      EnumProcedures + Trim(StringField(Buffer, 1, "(")) + ", "
+      Debug EnumProcedures
       ;Parameter type
       ; (ok) Byte: The parameter will be a byte (1 byte)
       ; (ok) Word: The parameter will be a word (2 bytes)
@@ -138,48 +144,82 @@ Procedure Parse(Buffer.s)
       ; (ok) Float: The parameter will be a float (4 bytes)
       ; (ok) Double: The parameter will be a double (8 bytes)
       ; Any: The parameter can be anything (the compiler won't check the type)
-      ; Array: The parameter will be an Array. It will have To be passed like: Array()
+      ; (ok) Array: The parameter will be an Array. It will have To be passed like: Array()
       ; LinkedList: The parameter will be an linkedlist. It will have To be passed like: List()
+      
+      ;Remove first bracket and last bracket
+      Parameters =  Mid(Buffer, FindString(Buffer, "("), Len(Buffer) -1)
+      Buffer = Mid(Parameters, 2, Len(Parameters) - 2)
+      
+      ;Parse each variable 
+      For n = 1 To CountString(Buffer, ", ") + 1
+        Variable = Trim(StringField(Buffer, n, ","))
         
-      ;Remove first bracket - Supprime la premiére parenthése
-      Buffer =  StringField(Buffer, 2, "(")
-      
-      ;Remove last bracket - Supprime la derniere parenthése
-      Buffer =  LSet(Buffer, Len(Buffer)-1)
-      
-      
-      ;Parse each variable - Parse chaque variable 
-      For n = 1 To CountString(Buffer, ",") + 1
-        Variable = StringField(Buffer, n, ",")
+        If FindString(Variable, "=")
+          Variable = Trim(StringField(Variable, 1, "="))
+          DefaultValue = #True
+        EndIf
                 
         Select StringField(Variable, 2, ".")
           Case "b"
-            EnumProcedures + "Bytes, "
+            If DefaultValue
+              EnumProcedures + "[Byte], "
+            Else
+              EnumProcedures + "Byte, "
+            EndIf
             
           Case "i", "l"
-            EnumProcedures + "Long, "
+            If DefaultValue
+              EnumProcedures + "[Long], "
+            Else
+              EnumProcedures + "Long, "
+            EndIf
             
           Case "d"
-            EnumProcedures + "Double, "
+            If DefaultValue
+              EnumProcedures + "[Double], "
+            Else
+              EnumProcedures + "Double, "
+            EndIf
             
           Case "f"
-            EnumProcedures + "Float, "
+            If DefaultValue
+              EnumProcedures + "[Float], "
+            Else
+              EnumProcedures + "[Float], "
+            EndIf
             
           Case "q"
-            EnumProcedures + "Quad, "
-
+            If DefaultValue
+              EnumProcedures + "[Quad], "
+            Else
+              EnumProcedures + "Quad, "
+            EndIf
+            
           Case "w"
-            EnumProcedures + "Word, "
+            If DefaultValue
+              EnumProcedures + "[Word], "
+            Else
+              EnumProcedures + "Word, "
+            EndIf
             
           Case "s"
-            EnumProcedures + "String, "
+            If DefaultValue
+              EnumProcedures + "[String], "
+            Else
+              EnumProcedures + "String, "
+            EndIf
             
           Default
-            If Not FindString(ReturnValue, "none", 0, #PB_String_NoCase)
+            If FindString(Variable, "Array", 0, #PB_String_NoCase)
+              EnumProcedures + "Array, "
+              
+            ElseIf Not FindString(ReturnValue, "none", 0, #PB_String_NoCase)
               EnumProcedures + "Long, "
             EndIf
         EndSelect
       Next
+      DefaultValue = #False
       Finalyse = #True
       
     Case "procedurereturn"
@@ -188,10 +228,11 @@ Procedure Parse(Buffer.s)
   
   ;Finalyse
   If Finalyse = #True
-    EnumProcedures + Function + " - " + #CRLF$  + ReturnValue + #CRLF$ + #CRLF$
+    EnumProcedures + Parameters + " - " + #CRLF$  + ReturnValue + #CRLF$ + #CRLF$
   EndIf
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; FirstLine = 138
-; Folding = ---
+; CursorPosition = 136
+; FirstLine = 130
+; Folding = ----
 ; EnableXP
