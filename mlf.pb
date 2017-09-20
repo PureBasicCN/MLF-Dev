@@ -93,7 +93,7 @@ Procedure Start()
   ButtonGadget(#mfPBCompil, 20, 80, 100, 24, "Compil")
   ButtonGadget(#mfLIBCreate, 130, 80, 100, 24, "Create Library")
   ButtonGadget(#mfLibShow, 240, 80, 120, 24, "Show User Libray") 
-    
+  
   ;View console log
   ListViewGadget(#mfLog, 5, 130, WindowWidth(#mf) - 15, 400, #PB_Editor_ReadOnly)
   SetGadgetColor(#mfLog, #PB_Gadget_BackColor, RGB(169, 169, 169))
@@ -121,14 +121,14 @@ Procedure Start()
   ;End Wrapper Panel
   
   ResetWindow()
-    
+  
   ;-Triggers
   BindGadgetEvent(#mfLang, @LangChange())           ;Change lang
   BindGadgetEvent(#mfPBSelect, @PBSelect())         ;Select PureBasic code
   BindGadgetEvent(#mfPBCompil, @ASMCreate())        ;Create ASM file, Parsed and modified ASM file and create description (DESC) file 
   BindGadgetEvent(#mfLIBCreate, @OBJCreate())       ;Create OBJ file and User Libray
   BindGadgetEvent(#mfDESCUpdate, @DESCSave())       ;Save DESC file if the user changes the source 
-
+  
   BindGadgetEvent(#mfLibShow, @LIBShowUserLib())    ;Show user library folder
   BindEvent(#PB_Event_CloseWindow, @Exit())         ;Exit
   
@@ -167,20 +167,20 @@ Procedure ASMCreate()
   
   ;Delete previous PureBasic.asm file if exist
   FileDelete("PureBasic.asm")
- 
+  
   ;Delete previous library 
   FileName = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + FilePart + #DQUOTE$
   FileDelete(FileName) ;- Does not work
-    
+  
   ;Delete previous PureLibrariesMaker.log
   FileDelete("PureLibrariesMaker.log")
   
   ;Delete YOUR previous ASM Files if exist
   FileDelete(FilePart + ".asm")
-    
+  
   ;Delete previous PureBasic.desc file if exist
   FileDelete(FilePart + ".desc")
-    
+  
   ;Compile PB -> ASM 
   ConsoleLog("Waiting for compile ...")
   Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED" , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
@@ -239,7 +239,7 @@ Procedure OBJCreate()
   Protected Compiler
   Protected ASMFilename.s = #DQUOTE$ + FilePart + ".asm" + #DQUOTE$
   Protected OBJFileName.s = #DQUOTE$ + FilePart + ".obj" + #DQUOTE$
-    
+  
   Compiler = RunProgram(#PB_Compiler_Home + "Compilers\FAsm.exe", "" + ASMFilename + " " + OBJFileName, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
     While ProgramRunning(Compiler)
@@ -338,7 +338,8 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 151
+; CursorPosition = 338
+; FirstLine = 285
 ; Folding = -----
 ; EnableXP
 ; EnableAdmin
