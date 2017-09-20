@@ -25,7 +25,7 @@ Procedure Analyse(ASMFileName.s)
         Until FindString(Buffer, "  ") = 0        
         
         ASMContent + Buffer + #CRLF$
-        ;Insert public PB_YourProcedure() and PB_YourProcedure after the comment line ; ProcedureDL Yourprocedure
+        ;Insert public PB_YourProcedure() and PB_YourProcedure after the comment line ; ProcedureDLL Yourprocedure
         
         ;Example
         ; ProcedureDLL Add(x, y)
@@ -45,7 +45,7 @@ Procedure Analyse(ASMFileName.s)
     Wend
     CloseFile(0)
   EndIf
-    
+  
   ;-Create ASM file
   If CreateFile(0, ASMFileName)
     WriteString(0, ASMContent)
@@ -103,128 +103,138 @@ EndProcedure
 
 ;
 Procedure Parse(Buffer.s)
-  Protected Name.s, Parameters.s, Variable.s, DefaultValue.b, ReturnValue.s, n 
+  Protected ProcedureType.s       ;Type 
+  Protected ProcedureParameters.s ;(Buffer$, Position.i)
+  Protected Variable.s, n
+  Protected DefaultValue.b        ;Variable has a default value
+  Protected CountParameters       
   
   Buffer = Trim(Mid(Buffer, 2, Len(Buffer)))
   
   Select LCase(StringField(StringField(Buffer, 1, " "), 1, "."))
     Case "proceduredll", "procedurecdll"
+      ConsoleLog("-Parse : " + Buffer)
       
       ;-Parse type de procedure
       Select  StringField(StringField(Buffer, 1, " "), 2, ".")
-        Case "i", "l"
-          ReturnValue =  "Long | StdCall"
+        Case "i", "l"  
+          ProcedureType =  "Long | StdCall"
           
         Case "s"
-          ReturnValue = "String | StdCall"
+          ProcedureType = "String | StdCall | Unicode"
           
         Default
-          ReturnValue = "Long | StdCall"
+          ProcedureType = "Long | StdCall"
       EndSelect
       
       ;-Procedure without variable 
       If CountString(Buffer, "()") = 1
-        ReturnValue = "None | StdCall"        
+        CountParameters = 0
+      Else
+        CountParameters = CountString(Buffer, ",") + 1
       EndIf
       
       ;-Remove "ProcedureDLL"
       Buffer = Trim(Mid(Buffer, Len(Trim(StringField(Buffer, 1, " ")))+1))
       
-      ;-Extract procedure name
+      ;-Extract procedure name 
       EnumProcedures + Trim(StringField(Buffer, 1, "(")) + ", "
-      ;Parameter type
-      ; (ok) Byte: The parameter will be a byte (1 byte)
-      ; (ok) Word: The parameter will be a word (2 bytes)
-      ; (ok) Long: The parameter will be a long (4 bytes)
-      ; (ok) String: The parameter will be a string (see below For an explaination of string handling)
-      ; (ok) Quad: The parameter will be a quad (8 bytes)
-      ; (ok) Float: The parameter will be a float (4 bytes)
-      ; (ok) Double: The parameter will be a double (8 bytes)
+      
+      ;-Parse each variable
+
+      ;Parameter type (Code : Coce done, ? : No test, Bug : Bad result)
+      ; (Code ?) Byte: The parameter will be a byte (1 byte)
+      ; (Cone ?) Word: The parameter will be a word (2 bytes)
+      ; (Cone Done) Long: The parameter will be a long (4 bytes)
+      ; (Code Done) String: The parameter will be a string (see below For an explaination of string handling)
+      ; (Code ?) Quad: The parameter will be a quad (8 bytes)
+      ; (Code Bug) Float: The parameter will be a float (4 bytes)
+      ; (Code ?) Double: The parameter will be a double (8 bytes)
       ; Any: The parameter can be anything (the compiler won't check the type)
-      ; (ok) Array: The parameter will be an Array. It will have To be passed like: Array()
+      ; (Done Bug) Array: The parameter will be an Array. It will have To be passed like: Array()
       ; LinkedList: The parameter will be an linkedlist. It will have To be passed like: List()
       
       ;Remove first bracket and last bracket
-      Parameters =  Mid(Buffer, FindString(Buffer, "("), Len(Buffer) -1)
-      Buffer = Mid(Parameters, 2, Len(Parameters) - 2)
-      
-      ;Parse each variable 
-      For n = 1 To CountString(Buffer, ", ") + 1
-        Variable = Trim(StringField(Buffer, n, ","))
-        
-        If FindString(Variable, "=")
-          Variable = Trim(StringField(Variable, 1, "="))
-          DefaultValue = #True
-        EndIf
-                
-        Select StringField(Variable, 2, ".")
-          Case "b"
-            If DefaultValue
-              EnumProcedures + "[Byte], "
-            Else
-              EnumProcedures + "Byte, "
-            EndIf
-            
-          Case "i", "l"
-            If DefaultValue
-              EnumProcedures + "[Long], "
-            Else
-              EnumProcedures + "Long, "
-            EndIf
-            
-          Case "d"
-            If DefaultValue
-              EnumProcedures + "[Double], "
-            Else
-              EnumProcedures + "Double, "
-            EndIf
-            
-          Case "f"
-            If DefaultValue
-              EnumProcedures + "[Float], "
-            Else
-              EnumProcedures + "Float, "
-            EndIf
-            
-          Case "q"
-            If DefaultValue
-              EnumProcedures + "[Quad], "
-            Else
-              EnumProcedures + "Quad, "
-            EndIf
-            
-          Case "w"
-            If DefaultValue
-              EnumProcedures + "[Word], "
-            Else
-              EnumProcedures + "Word, "
-            EndIf
-            
-          Case "s"
-            If DefaultValue
-              EnumProcedures + "[String], "
-            Else
-              EnumProcedures + "String, "
-            EndIf
-            
-          Default
-            
-            If FindString(Variable, "$")
+      ProcedureParameters =  Mid(Buffer, FindString(Buffer, "("), Len(Buffer) -1)
+      Buffer = Mid(ProcedureParameters, 2, Len(ProcedureParameters) - 2)
+      If CountParameters <> 0
+        For n = 1 To CountString(Buffer, ", ") + 1
+          Variable = Trim(StringField(Buffer, n, ","))
+          
+          If FindString(Variable, "=")
+            Variable = Trim(StringField(Variable, 1, "="))
+            DefaultValue = #True
+          EndIf
+          
+          Select StringField(Variable, 2, ".")
+            Case "b"
               If DefaultValue
-                EnumProcedures + "[String],"
+                EnumProcedures + "[Byte], "
               Else
-                EnumProcedures + "String,"
+                EnumProcedures + "Byte, "
               EndIf
               
-            ElseIf FindString(Variable, "Array", 0, #PB_String_NoCase)
-              EnumProcedures + "Array, "
+            Case "i", "l"
+              If DefaultValue
+                EnumProcedures + "[Long], "
+              Else
+                EnumProcedures + "Long, "
+              EndIf
               
-            ElseIf Not FindString(ReturnValue, "none", 0, #PB_String_NoCase)
-              EnumProcedures + "Long, "
-            EndIf
-        EndSelect
-      Next
-      DefaultValue = #False
+            Case "d"
+              If DefaultValue
+                EnumProcedures + "[Double], "
+              Else
+                EnumProcedures + "Double, "
+              EndIf
+              
+            Case "f"
+              If DefaultValue
+                EnumProcedures + "[Float], "
+              Else
+                EnumProcedures + "Float, "
+              EndIf
+              
+            Case "q"
+              If DefaultValue
+                EnumProcedures + "[Quad], "
+              Else
+                EnumProcedures + "Quad, "
+              EndIf
+              
+            Case "w"
+              If DefaultValue
+                EnumProcedures + "[Word], "
+              Else
+                EnumProcedures + "Word, "
+              EndIf
+              
+            Case "s"
+              If DefaultValue
+                EnumProcedures + "[String], "
+              Else
+                EnumProcedures + "String, "
+              EndIf
+              
+            Default
+              
+              If FindString(Variable, "$")
+                If DefaultValue
+                  EnumProcedures + "[String],"
+                Else
+                  EnumProcedures + "String,"
+                EndIf
+                
+              ElseIf FindString(Variable, "Array", 0, #PB_String_NoCase)
+                EnumProcedures + "Array, "
+                
+              ElseIf Not FindString(ProcedureType, "none", 0, #PB_String_NoCase)
+                EnumProcedures + "Long, "
+              EndIf
+          EndSelect
+        Next
+        DefaultValue = #False
+      EndIf 
       Finalyse = #True
       
     Case "procedurereturn"
@@ -233,11 +243,11 @@ Procedure Parse(Buffer.s)
   
   ;Finalyse
   If Finalyse = #True
-    EnumProcedures + Parameters + " - " + #CRLF$  + ReturnValue + #CRLF$ + #CRLF$
+    EnumProcedures + ProcedureParameters + " - " + #CRLF$  + ProcedureType + #CRLF$ + #CRLF$
   EndIf
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 235
-; FirstLine = 150
+; CursorPosition = 159
+; FirstLine = 156
 ; Folding = -----
 ; EnableXP

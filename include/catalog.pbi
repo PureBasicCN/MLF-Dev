@@ -1,7 +1,7 @@
 ﻿;MLF - Make Library Factory
 
 Global Title.s = "MLF"
-Global Version.s = "0.7 Alpha"
+Global Version.s = "0.8 Alpha"
 
 Global Lang = 0 ;0 : Fr, 1, En
 
