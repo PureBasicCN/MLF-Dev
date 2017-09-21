@@ -104,15 +104,17 @@ EndProcedure
 ;
 Procedure Parse(Buffer.s)
   Protected ProcedureType.s       ;Type 
-  Protected ProcedureParameters.s ;(Buffer$, Position.i)
+  Protected ProcedureParameters.s ;(Buffer$, Position.i
+  Protected ProcedureParametersEnd.s ;(Buffer$, Position.i
   Protected Variable.s, n
   Protected DefaultValue.b        ;Variable has a default value
-  Protected CountParameters       
+  Protected CountParameters, CurrentParameter.i       
   
   Buffer = Trim(Mid(Buffer, 2, Len(Buffer)))
   
   Select LCase(StringField(StringField(Buffer, 1, " "), 1, "."))
     Case "proceduredll", "procedurecdll"
+      
       ConsoleLog("-Parse : " + Buffer)
       
       ;-Parse type de procedure
@@ -157,9 +159,15 @@ Procedure Parse(Buffer.s)
       ;Remove first bracket and last bracket
       ProcedureParameters =  Mid(Buffer, FindString(Buffer, "("), Len(Buffer) -1)
       Buffer = Mid(ProcedureParameters, 2, Len(ProcedureParameters) - 2)
+      
+      ProcedureParameters = "("
+      
       If CountParameters <> 0
         For n = 1 To CountString(Buffer, ", ") + 1
           Variable = Trim(StringField(Buffer, n, ","))
+          CurrentParameter + 1
+          
+          ConsoleLog("Parse parameter : " +  Variable)
           
           If FindString(Variable, "=")
             Variable = Trim(StringField(Variable, 1, "="))
@@ -232,7 +240,24 @@ Procedure Parse(Buffer.s)
                 EnumProcedures + "Long, "
               EndIf
           EndSelect
+          
+          If CurrentParameter = 1
+            If DefaultValue
+              ProcedureParameters + "[" + Variable
+              ProcedureParametersEnd + "]"
+            Else
+              ProcedureParameters + Variable
+            EndIf
+          Else
+            If DefaultValue 
+              ProcedureParameters + " [, " + Variable
+              ProcedureParametersEnd + "]"
+            Else
+              ProcedureParameters + " , " + Variable
+            EndIf
+          EndIf
         Next
+        
         DefaultValue = #False
       EndIf 
       Finalyse = #True
@@ -243,11 +268,12 @@ Procedure Parse(Buffer.s)
   
   ;Finalyse
   If Finalyse = #True
+    ProcedureParameters + ProcedureParametersEnd + ")"
     EnumProcedures + ProcedureParameters + " - " + #CRLF$  + ProcedureType + #CRLF$ + #CRLF$
   EndIf
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 159
-; FirstLine = 156
+; CursorPosition = 270
+; FirstLine = 225
 ; Folding = -----
 ; EnableXP
