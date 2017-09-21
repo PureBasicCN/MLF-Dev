@@ -273,7 +273,7 @@ EndProcedure
 Procedure MakeStaticLib()  
   Protected Compiler
   Protected SourcePath.s      = #DQUOTE$ + FilePart + ".Desc" + #DQUOTE$
-  Protected DestinationPath.s = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + #DQUOTE$  ; + " /COMPRESSED "
+  Protected DestinationPath.s = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + #DQUOTE$  ; + " /COMPRESSED /NOUNICODEWARNING "
   
   Compiler = RunProgram(#PB_Compiler_Home + "sdk\LibraryMaker.exe", SourcePath + " /TO " + DestinationPath, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   
@@ -338,8 +338,8 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 338
-; FirstLine = 285
+; CursorPosition = 275
+; FirstLine = 268
 ; Folding = -----
 ; EnableXP
 ; EnableAdmin
