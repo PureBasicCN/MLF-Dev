@@ -7,6 +7,7 @@
 
 ;16 September 2017 - First version  
 
+
 EnableExplicit
 
 Enumeration Font
@@ -338,8 +339,7 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 275
-; FirstLine = 268
+; CursorPosition = 9
 ; Folding = -----
 ; EnableXP
 ; EnableAdmin
