@@ -1,4 +1,4 @@
-﻿ProcedureDLL.s GetOSName()
+ProcedureDLL.s GetOSName()
   Protected Size
   Protected Name$
   Protected Result
@@ -15,7 +15,6 @@
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
 ; ExecutableFormat = Shared dll
-; CursorPosition = 14
 ; Folding = -
 ; EnableXP
-; Executable = mydll.dll
+; Executable = mydll.dll#,X[?q
