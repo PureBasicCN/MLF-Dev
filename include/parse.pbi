@@ -3,18 +3,15 @@
 EnableExplicit
 
 Global EnumHeader.s, EnumDependancies.s, EnumProcedures.s, Finalyse.b
-Global ProcedureName.s, PreviousProcedureName.s, PreviousProcedureParameters.s;, Buffer.s 
+Global ProcedureName.s, PreviousProcedureName.s, PreviousProcedureParameters.s
 
 Declare Analyse(ASMFileName.s)
 Declare Parse(Buffer.s)
 
 Procedure Analyse(ASMFileName.s)
-  Protected ProcedureName.s
-  Protected ASMContent.s
-  Protected DESCContent.s
-  Protected Token
-  Protected Buffer.s, CountDependancies, LineStartDependancies = 7, CurrentLine
-  Protected HelpFileName.s = "HelpFileName" 
+  Protected ASMContent.s, ASMCountDependancies, ASMLineStartDependancies = 7, ASMCurrentLine
+  Protected DESCContent.s, DESCHelpFileName.s = "DESCHelpFileName" 
+  Protected Buffer.s, Token
   
   ;-Parse and create ASM file
   If ReadFile(0, ASMFileName) 
@@ -22,16 +19,17 @@ Procedure Analyse(ASMFileName.s)
       Buffer = ReadString(0)
       If FindString(Buffer, "; procedure", 0, #PB_String_NoCase) And Not FindString(Buffer, "; procedurereturn", 0, #PB_String_NoCase)
         Token = #True
-        ;Normalize        
+        
+        ;Normalize (Removes unnecessary spaces)       
         Repeat 
           Buffer = ReplaceString(Buffer, "  ", " ")
         Until FindString(Buffer, "  ") = 0        
         
         ASMContent + Buffer + #CRLF$
-        ;Insert public PB_YourProcedure() and PB_YourProcedure after the comment line ; ProcedureDLL Yourprocedure
+        ;Insert "public PB_YourProcedure()" and "PB_YourProcedure" after the comment line "; ProcedureDLL Yourprocedure"
         
         ;Example
-        ; ProcedureDLL Add(x, y)
+        ; ; ProcedureDLL Add(x, y)
         ; public PB_Add
         ; PB_Add:
         ProcedureName = StringField(StringField(Buffer, 3, " "), 1, "(")
@@ -61,6 +59,10 @@ Procedure Analyse(ASMFileName.s)
   EnumHeader + "0" + #CRLF$     ; Number of windows DLL than the library need
   EnumHeader + "OBJ" + #CRLF$   ; Library type (Can be OBJ or LIB).  
   
+  EnumDependancies = ""         ; Enumeration of dependencies.
+  EnumProcedures = ""           ; Enumeration of procedures.
+  
+  
   ;-Extract and count dependancies (Number of PureBasic library needed by the library.)
   If ReadFile(0, ASMFileName) 
     While Eof(0) = 0
@@ -68,12 +70,12 @@ Procedure Analyse(ASMFileName.s)
       If FindString(Buffer, "; :System", 0, #PB_String_NoCase)
         Break
       Else
-        If CurrentLine >= LineStartDependancies
-          CountDependancies + 1
+        If ASMCurrentLine >= ASMLineStartDependancies
+          ASMCountDependancies + 1
           EnumDependancies + Mid(Buffer, 3) + #CRLF$
         EndIf
       EndIf
-      CurrentLine + 1
+      ASMCurrentLine + 1
     Wend
     CloseFile(0)
   EndIf
@@ -88,22 +90,23 @@ Procedure Analyse(ASMFileName.s)
     Wend
     CloseFile(0)
     Parse(#EOT$)
-  EndIf
-  
-  ;-Create DESC content filename
-  DESCContent = EnumHeader + Str(CountDependancies) + #CRLF$ + #CRLF$ +
-                "; " + Str(CountDependancies) + " Dependancies " + #CRLF$ +
-                EnumDependancies + #CRLF$ +
-                "; Your help file" + #CRLF$ +
-                HelpFileName + #CRLF$ + #CRLF$ +
-                "; Procedure summary" + #CRLF$ +
-                EnumProcedures
-  
-  ;-Create DESC file
-  If CreateFile(0,  GetFilePart(ASMFileName, #PB_FileSystem_NoExtension) + ".desc")
-    WriteString(0, DESCContent)
-    CloseFile(0) 
-  EndIf
+    
+    
+    ;-Create DESC content filename
+    DESCContent = EnumHeader + Str(ASMCountDependancies) + #CRLF$ + #CRLF$ +
+                  "; " + Str(ASMCountDependancies) + " Dependancies " + #CRLF$ +
+                  EnumDependancies + #CRLF$ +
+                  "; Your help file" + #CRLF$ +
+                  DESCHelpFileName + #CRLF$ + #CRLF$ +
+                  "; Procedure summary" + #CRLF$ +
+                  EnumProcedures
+    
+    ;-Create DESC file
+    If CreateFile(0,  GetFilePart(ASMFileName, #PB_FileSystem_NoExtension) + ".desc")
+      WriteString(0, DESCContent)
+      CloseFile(0) 
+    EndIf
+  EndIf 
 EndProcedure
 
 ;
@@ -136,11 +139,10 @@ Procedure Parse(Buffer.s)
     EndIf 
   EndIf
   
-  
   If LCase(StringField(StringField(Buffer, 1, " "), 1, ".")) = "procedurereturn"
     Token = #True
   EndIf
-    
+  
   If Token = #True
     Select LCase(StringField(StringField(Buffer, 1, " "), 1, "."))
       Case "proceduredll", "procedurecdll"
@@ -252,12 +254,11 @@ Procedure Parse(Buffer.s)
                 EndIf
                 
               Default
-                
                 If FindString(Variable, "$")
                   If DefaultValue
-                    EnumProcedures + "[String],"
+                    EnumProcedures + "[String], "
                   Else
-                    EnumProcedures + "String,"
+                    EnumProcedures + "String, "
                   EndIf
                   
                 ElseIf FindString(Variable, "Array", 0, #PB_String_NoCase)
@@ -301,7 +302,7 @@ Procedure Parse(Buffer.s)
   EndIf
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 16
-; FirstLine = 240
+; CursorPosition = 198
+; FirstLine = 187
 ; Folding = ------
 ; EnableXP
