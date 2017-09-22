@@ -1,4 +1,7 @@
 # MLF - Make Lib Factory
+- Status : Version Alpha  
+- Pure Basic 5.60+   
+- Compilation : [x] Request Administrator mode 
 
 ## Description.
 MLF is a utility for creating user libraries for the PureBasic language.    
