@@ -7,7 +7,6 @@
 
 ;16 September 2017 - First version  
 
-
 EnableExplicit
 
 Enumeration Font
@@ -23,7 +22,7 @@ Enumeration Gadget
   #mfLang  
   #mfPanel
   
-  ;Panel 0
+  ;Panel 0 - Select purebasic file, compil and create user lib
   #mfPBFrame
   #mfPBCodeName
   #mfPBSelect
@@ -32,17 +31,17 @@ Enumeration Gadget
   #mfLibShow
   #mfLog
   
-  ;Panel 1
+  ;Panel 1 - View ASM code
   #mfASMName
   #mfASMEdit
   
-  ;Panel 2 
+  ;Panel 2 - View and update DESC code (Save is optionel)
   #mfDESCName
   #mfDESCEdit
   #mfDESCUpdate
 EndEnumeration
 
-Global PBFileName.s, PathPart.s, FilePart.s, ExtPart.s
+Global PBFileName.s, PathPart.s, FilePart.s;, ExtPart.s
 
 ;-Application Summary
 Declare   Start()                 ;Fonts, Window and Triggers
@@ -65,6 +64,7 @@ IncludePath "include"
 IncludeFile "catalog.pbi"
 IncludeFile "parse.pbi"
 IncludeFile "sounderror.pbi"
+IncludeFile "LockResize.pbi"
 
 Start()
 
@@ -75,7 +75,8 @@ Procedure Start()
   SetGadgetFont(#PB_Default, FontID(#FontGlobal))
   
   ;-Window
-  OpenWindow(#mf, 0, 0, 800, 600, m("title"), #PB_Window_SystemMenu|#PB_Window_ScreenCentered)
+  UseLockGadget()
+  OpenWindow(#mf, 0, 0, 800, 600, "", #PB_Window_SystemMenu|#PB_Window_ScreenCentered|#PB_Window_SizeGadget)
   
   ;Select lang
   ComboBoxGadget(#mfLang, WindowWidth(#mf) - 90, 10, 80, 22)
@@ -83,8 +84,10 @@ Procedure Start()
   
   ;Wrapper Panel
   PanelGadget(#mfPanel, 0, 40, WindowWidth(#mf)+2, WindowHeight(#mf) - 40)
-  AddGadgetItem (#mfPanel, -1, m("genasm"))
-  FrameGadget(#mfPBFrame, 5, 20, WindowWidth(#mf) - 15, 100, m("selpbfile"))
+  
+  ;Panel : Select code PureBasic to be compiled
+  AddGadgetItem (#mfPanel, -1, "")
+  FrameGadget(#mfPBFrame, 5, 20, WindowWidth(#mf) - 15, 100, "")
   
   ;File Name
   TextGadget(#mfPBCodeName, 20, 50, WindowWidth(#mf) - 130, 22, "")
@@ -102,27 +105,43 @@ Procedure Start()
   ConsoleLog(m("welcome"))
   ConsoleLog("PureBasic version : " + Str(#PB_Compiler_Version) + " " + GetCompilerProcessor())
   
-  ;View code ASM
-  AddGadgetItem (#mfPanel, -1, m("viewasm"))
+  ;Panel : View code ASM
+  AddGadgetItem (#mfPanel, -1, "")
   TextGadget(#mfASMName, 5, 10, WindowWidth(#mf) - 15, 22, "") 
   SetGadgetFont(#mfASMName, FontID(#FontH1))
   SetGadgetColor(#mfASMName, #PB_Gadget_BackColor, RGB(192, 192, 192))
   EditorGadget(#mfASMEdit, 5, 35, WindowWidth(#mf) - 15, 470)
   SetGadgetColor(#mfASMEdit, #PB_Gadget_BackColor, RGB(211, 211, 211))
   
-  ;View code DESC
-  AddGadgetItem(#mfPanel, -1, m("viewdesc"))
+  ;Panel : View and/or updated code DESC
+  AddGadgetItem(#mfPanel, -1, "")
   TextGadget(#mfDESCName, 5, 10, WindowWidth(#mf) - 15, 22, "") 
   SetGadgetFont(#mfDESCName, FontID(#FontH1))
   SetGadgetColor(#mfDESCName, #PB_Gadget_BackColor, RGB(192, 192, 192))
   EditorGadget(#mfDESCEdit, 5, 35, WindowWidth(#mf) - 15, 460)
   SetGadgetColor(#mfDESCEdit, #PB_Gadget_BackColor, RGB(211, 211, 211))
-  ButtonGadget(#mfDESCUpdate, WindowWidth(#mf) - 90, 500, 80, 22, m("save"))
+  ButtonGadget(#mfDESCUpdate, WindowWidth(#mf) - 90, 500, 80, 22, "")
   
   CloseGadgetList()
   ;End Wrapper Panel
   
-  ResetWindow()
+  LangChange()  ;Displays labels
+  ResetWindow() ;Clear gadgets
+  
+  WindowBounds(#mf, 380, 400, #PB_Ignore, #PB_Ignore)
+  
+  ;-Resize gadget (Window, Gadget, Left, Top, Right, Bottom)
+  LockGadget(#mf, #mfLang, #False, #True, #True, #False)
+  LockGadget(#mf, #mfPanel, #True, #True, #True, #True)
+  LockGadget(#mf, #mfPBFrame, #True, #True, #True, #False)
+  LockGadget(#mf, #mfPBCodeName, #True, #True, #True, #False)
+  LockGadget(#mf, #mfPBSelect, #False, #True, #True, #False)
+  LockGadget(#mf, #mfLog, #True, #True, #True, #True)
+  LockGadget(#mf, #mfASMName, #True, #True, #True, #False)
+  LockGadget(#mf, #mfASMEdit, #True, #True, #True, #True)
+  LockGadget(#mf, #mfDESCName, #True, #True, #True, #False)
+  LockGadget(#mf, #mfDESCEdit, #True, #True, #True, #True)
+  LockGadget(#mf, #mfDESCUpdate, #False, #False, #True, #True) 
   
   ;-Triggers
   BindGadgetEvent(#mfLang, @LangChange())           ;Change lang
@@ -152,7 +171,7 @@ Procedure PBSelect()
   If PBFileName
     PathPart = GetPathPart(PBFileName)
     FilePart = GetFilePart(PBFileName, #PB_FileSystem_NoExtension)
-    ExtPart  = GetExtensionPart(PBFileName)
+    ;ExtPart  = GetExtensionPart(PBFileName)
     ResetWindow()    
     SetGadgetText(#mfPBCodeName, " " + PBFileName)
     DisableGadget(#mfPBCompil, #False)
@@ -316,7 +335,7 @@ EndProcedure
 Procedure LangChange()
   SetLang(GetGadgetState(#mfLang))
   SetWindowTitle(#mf, m("title"))
-  SetGadgetItemText(#mfPanel, 0, m("genasm"))
+  SetGadgetItemText(#mfPanel, 0, m("compil"))
   SetGadgetText(#mfPBFrame, m("selpbfile"))
   SetGadgetItemText(#mfPanel, 1, m("viewasm"))
   SetGadgetItemText(#mfPanel, 2, m("viewdesc"))
@@ -350,8 +369,8 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 241
-; FirstLine = 217
+; CursorPosition = 183
+; FirstLine = 126
 ; Folding = ------
 ; EnableXP
 ; EnableAdmin
