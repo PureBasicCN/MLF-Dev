@@ -64,6 +64,7 @@ Declare   Exit()                  ;Exit
 IncludePath "include"
 IncludeFile "catalog.pbi"
 IncludeFile "parse.pbi"
+IncludeFile "sounderror.pbi"
 
 Start()
 
@@ -161,7 +162,7 @@ EndProcedure
 
 ;Create ASM file, Parsed and modified ASM file and create description (DESC) file
 Procedure ASMCreate()
-  Protected Compiler, Buffer.s, FileName.s
+  Protected Compiler, Buffer.s, FileName.s, Token.b
   
   ;Delete previous PureBasic.exe file if exist
   FileDelete("PureBasic.exe")
@@ -186,52 +187,62 @@ Procedure ASMCreate()
   ConsoleLog("Waiting for compile ...")
   Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED" , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
+    Token = #True
     While ProgramRunning(Compiler)
       If AvailableProgramOutput(Compiler)
-        ReadProgramString(Compiler)
         Buffer = ReadProgramString(Compiler)
+        If FindString(Buffer, "Error")
+          Token = #False
+        EndIf
         ConsoleLog(Buffer)
+        SetGadgetItemColor(#mfLog, CountGadgetItems(#mfLog)-1, #PB_Gadget_FrontColor, RGB(255, 0, 0))
       EndIf
     Wend
     CloseProgram(Compiler)
     
-    FileName = FilePart + ".asm"
-    If Not RenameFile("PureBasic.asm", Filename)
-      ConsoleLog(m("libexist"))
-      ConsoleLog(m("errordelete") + " " + Filename)
+    If Token
+      FileName = FilePart + ".asm"
+      If Not RenameFile("PureBasic.asm", Filename)
+        ConsoleLog(m("libexist"))
+        ConsoleLog(m("errordelete") + " " + Filename)
+      Else
+        ConsoleLog("Rename PureBasic.asm to " + FileName + " done." )       
+        
+        ;Parse ASM (Extract dependancies & procedures and create DESC File) 
+        Analyse(FileName)
+        
+        ;Init ASM Editor
+        SetGadgetText(#mfASMName, FileName)
+        DisableGadget(#mFASMEdit, #False)
+        SetGadgetText(#mFASMEdit, "") ;Clear editor
+        If ReadFile(0, Filename, #PB_Ascii)
+          While Eof(0) = 0
+            AddGadgetItem(#mfASMEdit, -1, ReadString(0))
+          Wend
+          CloseFile(0)
+        EndIf
+        
+        ;Init DESC editor
+        FileName = FilePart + ".desc"
+        SetGadgetText(#mfDESCName, FileName)
+        DisableGadget(#mfDESCEdit, #False)
+        SetGadgetText(#mfDESCEdit, "") ;Clear editor
+        If ReadFile(0, Filename)
+          While Eof(0) = 0
+            AddGadgetItem(#mfDESCEdit, -1, ReadString(0))
+          Wend
+          CloseFile(0)
+          ConsoleLog("You can view the ASM and DESC sources before create your user library")
+        EndIf
+        
+        DisableGadget(#mfLIBCreate, #False)
+        DisableGadget(#mfDESCUpdate, #False)
+      EndIf 
     Else
-      ConsoleLog("Rename PureBasic.asm to " + FileName + " done." )       
-      
-      ;Parse ASM (Extract dependancies & procedures and create DESC File) 
-      Analyse(FileName)
-      
-      ;Init ASM Editor
-      SetGadgetText(#mfASMName, FileName)
-      DisableGadget(#mFASMEdit, #False)
-      SetGadgetText(#mFASMEdit, "") ;Clear editor
-      If ReadFile(0, Filename, #PB_Ascii)
-        While Eof(0) = 0
-          AddGadgetItem(#mfASMEdit, -1, ReadString(0))
-        Wend
-        CloseFile(0)
-      EndIf
-      
-      ;Init DESC editor
-      FileName = FilePart + ".desc"
-      SetGadgetText(#mfDESCName, FileName)
-      DisableGadget(#mfDESCEdit, #False)
-      SetGadgetText(#mfDESCEdit, "") ;Clear editor
-      If ReadFile(0, Filename)
-        While Eof(0) = 0
-          AddGadgetItem(#mfDESCEdit, -1, ReadString(0))
-        Wend
-        CloseFile(0)
-        ConsoleLog("You can view the ASM and DESC sources before create your user library")
-      EndIf
-      
-      DisableGadget(#mfLIBCreate, #False)
-      DisableGadget(#mfDESCUpdate, #False)
-    EndIf 
+      PlaySound(Error)
+      MessageRequester("MLF", Buffer)
+    EndIf
+    
   EndIf
 EndProcedure
 
@@ -339,8 +350,9 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 9
-; Folding = -----
+; CursorPosition = 241
+; FirstLine = 217
+; Folding = ------
 ; EnableXP
 ; EnableAdmin
 ; Executable = mlf.exe
