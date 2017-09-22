@@ -1,7 +1,7 @@
 ﻿;MLF - Catalog
 
 Global Title.s = "MLF"
-Global Version.s = "0.96 Alpha"
+Global Version.s = "0.96.1 Alpha"
 
 Global Lang = 0 ;0 : Fr, 1, En
 
@@ -13,8 +13,8 @@ Global NewMap Catalog.NewMessage()
 
 AddMapElement(Catalog(), "title")
 With Catalog()
-  \Translate(0) = Title + " version " + Version + " - " + " Création d'une librairie static"
-  \Translate(1) = Title + " version " + Version + " - " + " Creating a static library" 
+  \Translate(0) = Title + " version " + Version + " - " + " Création d'une bibliothèque de fonctions utilisateur"
+  \Translate(1) = Title + " version " + Version + " - " + " Creating a user library" 
 EndWith 
 
 AddMapElement(Catalog(), "welcome")
@@ -23,32 +23,53 @@ With Catalog()
   \Translate(1) = "Welcome aboard." 
 EndWith 
 
+;Panel : Select code PureBasic to be compiled
+AddMapElement(Catalog(), "pancompil")
+With Catalog()
+  \Translate(0) = "Compiler un code PureBasic"
+  \Translate(1) = "Compile a PureBasic code" 
+EndWith 
+
 AddMapElement(Catalog(), "selpbfile")
 With Catalog()
   \Translate(0) = "Sélectionnez le code PureBasic à compiler."
   \Translate(1) = "Select the code PureBasic to be compiled." 
 EndWith 
 
-AddMapElement(Catalog(), "compil")
+AddMapElement(Catalog(), "pbselect")
 With Catalog()
-  \Translate(0) = "Compiler un code PureBasic"
-  \Translate(1) = "Compile a PureBasic code" 
+  \Translate(0) = "Selectionner"
+  \Translate(1) = "Select" 
 EndWith 
 
-AddMapElement(Catalog(), "selpb")
+AddMapElement(Catalog(), "pbcompil")
 With Catalog()
-  \Translate(0) = "Selectionnez code source PB"
-  \Translate(1) = "Select source code PB" 
+  \Translate(0) = "Compiler"
+  \Translate(1) = "Compil" 
+EndWith 
+
+AddMapElement(Catalog(), "libcreate")
+With Catalog()
+  \Translate(0) = "Créer bibliothéque"
+  \Translate(1) = "Create library" 
+EndWith 
+
+AddMapElement(Catalog(), "libshow")
+With Catalog()
+  \Translate(0) = "Voir bibliothéques"
+  \Translate(1) = "Show libraries" 
 EndWith 
 
 
-AddMapElement(Catalog(), "viewasm")
+;Panel : View code ASM
+AddMapElement(Catalog(), "panviewasm")
 With Catalog()
   \Translate(0) = "Voir source ASM"
   \Translate(1) = "View ASM source" 
 EndWith 
 
-AddMapElement(Catalog(), "viewdesc")
+;Panel : View and/or updated code DESC
+AddMapElement(Catalog(), "panviewdesc")
 With Catalog()
   \Translate(0) = "Voir source DESC"
   \Translate(1) = "View DESC source" 
@@ -123,6 +144,6 @@ EndProcedure
 
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 34
+; CursorPosition = 16
 ; Folding = -
 ; EnableXP
