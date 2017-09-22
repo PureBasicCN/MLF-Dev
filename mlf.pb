@@ -94,10 +94,10 @@ Procedure Start()
   SetGadgetColor(#mfPBCodeName, #PB_Gadget_BackColor, RGB(169, 169, 169))
   
   ;Action
-  ButtonGadget(#mfPBSelect, WindowWidth(#mf) - 100, 49, 80, 24, "Select")
-  ButtonGadget(#mfPBCompil, 20, 80, 100, 24, "Compil")
-  ButtonGadget(#mfLIBCreate, 130, 80, 100, 24, "Create Library")
-  ButtonGadget(#mfLibShow, 240, 80, 120, 24, "Show User Libray") 
+  ButtonGadget(#mfPBSelect, WindowWidth(#mf) - 100, 49, 80, 24, "")
+  ButtonGadget(#mfPBCompil, 20, 80, 150, 24, "")
+  ButtonGadget(#mfLIBCreate, 180, 80, 150, 24, "")
+  ButtonGadget(#mfLibShow, 340, 80, 150, 24, "")  
   
   ;View console log
   ListViewGadget(#mfLog, 5, 130, WindowWidth(#mf) - 15, 400, #PB_Editor_ReadOnly)
@@ -306,7 +306,7 @@ Procedure MakeStaticLib()
   Protected SourcePath.s      = #DQUOTE$ + FilePart + ".Desc" + #DQUOTE$
   Protected DestinationPath.s = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + #DQUOTE$  ; + " /COMPRESSED /NOUNICODEWARNING "
   
-  Compiler = RunProgram(#PB_Compiler_Home + "sdk\LibraryMaker.exe", SourcePath + " /TO " + DestinationPath, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  Compiler = RunProgram(#PB_Compiler_Home + "sdk\ ", SourcePath + " /TO " + DestinationPath, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   
   If Compiler
     While ProgramRunning(Compiler)
@@ -335,10 +335,14 @@ EndProcedure
 Procedure LangChange()
   SetLang(GetGadgetState(#mfLang))
   SetWindowTitle(#mf, m("title"))
-  SetGadgetItemText(#mfPanel, 0, m("compil"))
+  SetGadgetItemText(#mfPanel, 0, m("pancompil"))
   SetGadgetText(#mfPBFrame, m("selpbfile"))
-  SetGadgetItemText(#mfPanel, 1, m("viewasm"))
-  SetGadgetItemText(#mfPanel, 2, m("viewdesc"))
+  SetGadgetText(#mfPBSelect, m("pbselect"))
+  SetGadgetText(#mfPBCompil, m("pbcompil"))
+  SetGadgetText(#mfLIBCreate, m("libcreate"))
+  SetGadgetText(#mfLibShow, m("libshow"))  
+  SetGadgetItemText(#mfPanel, 1, m("panviewasm"))
+  SetGadgetItemText(#mfPanel, 2, m("panviewdesc"))
   SetGadgetText(#mfDESCUpdate, m("save"))
 EndProcedure
 
@@ -369,8 +373,8 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 183
-; FirstLine = 126
+; CursorPosition = 104
+; FirstLine = 75
 ; Folding = ------
 ; EnableXP
 ; EnableAdmin
