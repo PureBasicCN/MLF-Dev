@@ -1,7 +1,7 @@
 ﻿;MLF - Catalog
 
 Global Title.s = "MLF"
-Global Version.s = "0.90 Alpha"
+Global Version.s = "0.95 Alpha"
 
 Global Lang = 0 ;0 : Fr, 1, En
 

@@ -10,7 +10,7 @@ Declare Parse(Buffer.s)
 
 Procedure Analyse(ASMFileName.s)
   Protected ASMContent.s, ASMCountDependancies, ASMLineStartDependancies = 7, ASMCurrentLine
-  Protected DESCContent.s, DESCHelpFileName.s = "DESCHelpFileName" 
+  Protected DESCContent.s, DESCHelpFileName.s = "HelpFileName" 
   Protected Buffer.s, Token
   
   ;-Parse and create ASM file
@@ -61,7 +61,7 @@ Procedure Analyse(ASMFileName.s)
   
   EnumDependancies = ""         ; Enumeration of dependencies.
   EnumProcedures = ""           ; Enumeration of procedures.
-  
+  Finalyse = #False
   
   ;-Extract and count dependancies (Number of PureBasic library needed by the library.)
   If ReadFile(0, ASMFileName) 
@@ -302,7 +302,7 @@ Procedure Parse(Buffer.s)
   EndIf
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 198
-; FirstLine = 187
+; CursorPosition = 280
+; FirstLine = 92
 ; Folding = ------
 ; EnableXP
