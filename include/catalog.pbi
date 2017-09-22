@@ -1,7 +1,7 @@
 ﻿;MLF - Catalog
 
 Global Title.s = "MLF"
-Global Version.s = "0.95 Alpha"
+Global Version.s = "0.96 Alpha"
 
 Global Lang = 0 ;0 : Fr, 1, En
 
@@ -29,10 +29,10 @@ With Catalog()
   \Translate(1) = "Select the code PureBasic to be compiled." 
 EndWith 
 
-AddMapElement(Catalog(), "genasm")
+AddMapElement(Catalog(), "compil")
 With Catalog()
-  \Translate(0) = "Genéré source ASM"
-  \Translate(1) = "Generated ASM source" 
+  \Translate(0) = "Compiler un code PureBasic"
+  \Translate(1) = "Compile a PureBasic code" 
 EndWith 
 
 AddMapElement(Catalog(), "selpb")
@@ -123,6 +123,6 @@ EndProcedure
 
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 3
+; CursorPosition = 34
 ; Folding = -
 ; EnableXP
