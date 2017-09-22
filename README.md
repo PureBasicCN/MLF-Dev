@@ -1,8 +1,8 @@
 # MLF - Make Lib Factory
 
 ## Description.
-MLF is a utility for creating static libraries for the PureBasic language.  
-_MLF est un utilitaire pour créer des librairies statics pour le langage PureBasic_. 
+MLF is a utility for creating user libraries for the PureBasic language.    
+_MLF est un utilitaire de création de librairies utilisateur pour le langage PureBasic._   
 
 ## How it works ?
 
@@ -10,7 +10,7 @@ Select a PureBasic code containing your procedures.
 _Sélectionnez un code PureBasic contenant vos procédures._
 
 The compile button creates an ASM and DESC file.  
-_Le bouton compil  crée un fichier ASM et DESC._
+_Le bouton compil crée un fichier ASM et DESC._
 
 You can add the help of each function manually to the DESC file.  
 _Vous avez la possibilité d'ajouter l'aide de chaque fonction manuellement dans le fichier DESC._
