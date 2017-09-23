@@ -1,11 +1,22 @@
-﻿;MLF - Make Library Factory 
-
-;Contributor    : falsam
-
-;PureBasic      : 5.60 (x86)
-;Compil option  : Administrator Mode
-
-;16 September 2017 - First version  
+﻿;-=============================================================================
+; 
+; Project ...... : MLF : Make Library Factory
+; Name ......... : mlf.pb 
+; Type ......... : Main Code
+; Author ....... : falsam
+; CreateDate ... : 16, September 2017
+; Compiler ..... : PureBasic V5.60 (x86)
+; Flags ........ : Unicode/XP-Skin - Administrator Mode
+; Subsystem .... : none
+; TargetOS ..... : Windows
+; License ...... : ?
+; Link ......... : ?
+; Description .. : 
+;
+;==============================================================================
+; Changelog:
+; 23, September 2017 : Catalog.pbi - Header & German Text added by Bisonte
+;==============================================================================
 
 EnableExplicit
 
@@ -100,7 +111,7 @@ Procedure Start()
   ButtonGadget(#mfLibShow, 340, 80, 150, 24, "")  
   
   ;View console log
-  ListViewGadget(#mfLog, 5, 130, WindowWidth(#mf) - 15, 400, #PB_Editor_ReadOnly)
+  ListViewGadget(#mfLog, 5, 130, WindowWidth(#mf) - 15, 400)
   SetGadgetColor(#mfLog, #PB_Gadget_BackColor, RGB(169, 169, 169))
   ConsoleLog(m("welcome"))
   ConsoleLog("PureBasic version : " + Str(#PB_Compiler_Version) + " " + GetCompilerProcessor())
@@ -175,7 +186,7 @@ Procedure PBSelect()
     ResetWindow()    
     SetGadgetText(#mfPBCodeName, " " + PBFileName)
     DisableGadget(#mfPBCompil, #False)
-    ConsoleLog("Click the Compil button.") 
+    ConsoleLog("Click the compile button.") 
   EndIf
 EndProcedure
 
@@ -204,7 +215,8 @@ Procedure ASMCreate()
   
   ;Compile PB -> ASM 
   ConsoleLog("Waiting for compile ...")
-  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED" , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  ;Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED /THREAD " , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED " , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
     Token = #True
     While ProgramRunning(Compiler)
@@ -372,9 +384,9 @@ EndProcedure
 Procedure Exit()  
   End
 EndProcedure
-; IDE Options = PureBasic 5.61 (Windows - x86)
-; CursorPosition = 308
-; FirstLine = 297
+; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 218
+; FirstLine = 186
 ; Folding = ------
 ; EnableXP
 ; EnableAdmin

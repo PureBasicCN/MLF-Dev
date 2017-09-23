@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://www.purebasic.com/namespace" version="1.0" creator="PureBasic 5.45 LTS (Windows - x64)">
+<project xmlns="http://www.purebasic.com/namespace" version="1.0" creator="PureBasic 5.60 (Windows - x86)">
   <section name="config">
     <options closefiles="1" openmode="0" name="Make Library Factory (For PureBasic)"/>
   </section>
   <section name="data">
     <explorer view="include\" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2017-09-22 16:17" user="Eric" host="FALSAM"/>
+    <lastopen date="2017-09-23 19:04" user="Eric" host="FALSAM"/>
   </section>
   <section name="files">
     <file name="include\catalog.pbi">
       <config load="1" scan="1" panel="1" warn="1" lastopen="1" panelstate="++"/>
-      <fingerprint md5="a88a9e266f79472fb454ac93bb0021fa"/>
+      <fingerprint md5="6a824a6e9b1b82f55fcfa561cbb7db16"/>
     </file>
     <file name="include\LockResize.pbi">
       <config load="0" scan="1" panel="1" warn="1" lastopen="0" panelstate="++"/>
@@ -20,7 +20,7 @@
     </file>
     <file name="include\parse.pbi">
       <config load="1" scan="1" panel="1" warn="1" lastopen="1" panelstate="++"/>
-      <fingerprint md5="d37fededd9f5d59bb966c12e8406619b"/>
+      <fingerprint md5="29986e39fef797a12f1cf85883aee633"/>
     </file>
     <file name="include\sounderror.pbi">
       <config load="0" scan="1" panel="1" warn="1" lastopen="0" panelstate="++"/>
@@ -28,7 +28,7 @@
     </file>
     <file name="mlf.pb">
       <config load="1" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
-      <fingerprint md5="9ab5596d86e06ae2b4245a351c4633ec"/>
+      <fingerprint md5="689c3b68ad3654a0172c6a3e70d58362"/>
     </file>
   </section>
   <section name="targets">
