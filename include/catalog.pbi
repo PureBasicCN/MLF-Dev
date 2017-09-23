@@ -21,7 +21,7 @@
 #MLF_MaxLanguage = 2 ; 0 Based (0,1,2)
 
 Global Title.s = "MLF"
-Global Version.s = "0.96.1 Alpha"
+Global Version.s = "0.96.2 Alpha"
 
 ; 0 = FR, 1 = EN, 2 = DE
 Global Lang = 0
@@ -181,5 +181,6 @@ Procedure.s GetCompilerProcessor()
   EndIf  
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 23
 ; Folding = -
 ; EnableXP
