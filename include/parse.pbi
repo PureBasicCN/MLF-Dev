@@ -62,7 +62,7 @@ Procedure Analyse(ASMFileName.s)
         Repeat 
           Buffer = ReplaceString(Buffer, "  ", " ")
         Until FindString(Buffer, "  ") = 0        
-        
+        Buffer = ReplaceString(Buffer, " ,", ", ")
         ASMContent + Buffer + #CRLF$
         ;Insert "public PB_YourProcedure()" and "PB_YourProcedure" after the comment line "; ProcedureDLL Yourprocedure"
         
@@ -370,7 +370,7 @@ Procedure Parse(Buffer.s)
   EndIf
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 346
-; FirstLine = 234
+; CursorPosition = 71
+; FirstLine = 48
 ; Folding = ------
 ; EnableXP
