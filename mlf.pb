@@ -16,6 +16,8 @@
 ;==============================================================================
 ; Changelog:
 ; 23, September 2017 : Catalog.pbi - Header & German Text added by Bisonte
+; 24, Septemner 2017 : Russian Text add by mestnyi
+; 24, Septemner 2017 : Normalise() Format procedure name + parameters by GallyHC
 ;==============================================================================
 
 EnableExplicit
@@ -385,8 +387,7 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 218
-; FirstLine = 186
+; FirstLine = 39
 ; Folding = ------
 ; EnableXP
 ; EnableAdmin
