@@ -29,8 +29,9 @@ EndStructure
 Global EnumHeader.s, EnumDependancies.s, EnumProcedures.s, Finalyse.b
 Global ProcedureName.s
 
-Declare Analyse(ASMFileName.s)
-Declare Parse(Buffer.s)
+Declare   Analyse(ASMFileName.s)
+Declare   Parse(Buffer.s)
+Declare.s Normalize(Buffer.s)
 
 Procedure Analyse(ASMFileName.s)
   Protected ASMContent.s, ASMCountDependancies, ASMLineStartDependancies = 7, ASMCurrentLine
@@ -58,11 +59,9 @@ Procedure Analyse(ASMFileName.s)
       If FindString(Buffer, "; procedure", 0, #PB_String_NoCase) And Not FindString(Buffer, "; procedurereturn", 0, #PB_String_NoCase)
         Token = #True
         
-        ;Normalize (Removes unnecessary spaces)       
-        Repeat 
-          Buffer = ReplaceString(Buffer, "  ", " ")
-        Until FindString(Buffer, "  ") = 0        
-        Buffer = ReplaceString(Buffer, " ,", ", ")
+        ;Format procedure        
+        Buffer = Normalize(Buffer)
+        
         ASMContent + Buffer + #CRLF$
         ;Insert "public PB_YourProcedure()" and "PB_YourProcedure" after the comment line "; ProcedureDLL Yourprocedure"
         
@@ -369,8 +368,44 @@ Procedure Parse(Buffer.s)
     EnumProcedures + ProcedureParameters + " - Your IDE help description " + #CRLF$  + ProcedureType + #CRLF$ + #CRLF$
   EndIf
 EndProcedure
+
+;Format procedure by GallyHC
+Procedure.s Normalize(Buffer.s)
+  Define.i i
+  Define.b bblock, bspace
+  Define.s stemps, result
+  
+  For i=1 To Len(Buffer)
+    stemps = Mid(Buffer, i, 1)
+    If stemps = ~"\""
+      bblock = (bblock + 1) % 2
+    EndIf
+    If bblock = #True
+      result + stemps
+    Else
+      If bspace = #False Or stemps <> " "
+        result + stemps
+        If i < Len(Buffer)
+          If stemps = "," And Mid(Buffer, i + 1, 1) <> " "
+            result + " "
+          EndIf
+        EndIf
+        bspace = #False
+      EndIf
+      If stemps = " "
+        bspace = #True
+      EndIf
+    EndIf
+  Next i
+  result = ReplaceString(result, " , ", " ,")
+  result = ReplaceString(result, " ,", ", ")
+  result = ReplaceString(result, " (", "(")
+  result = ReplaceString(result, "( ", "(")
+  result = ReplaceString(result, " )", ")")
+  ProcedureReturn result
+EndProcedure
+
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 71
-; FirstLine = 48
-; Folding = ------
+; Folding = -------
+; Markers = 62
 ; EnableXP
