@@ -10,7 +10,7 @@
 ; Subsystem .... : none
 ; TargetOS ..... : Windows
 ; License ...... : ?
-; Link ......... : ?
+; Link ......... : https://github.com/MLF4PB/MLF-Alpha/archive/master.zip
 ; Description .. : 
 ;
 ;==============================================================================
@@ -203,9 +203,10 @@ Procedure ASMCreate()
   FileDelete("PureBasic.asm")
   
   ;Delete previous library 
-  FileName = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + FilePart + #DQUOTE$
-  FileDelete(FileName) ;- Does not work
-  
+  ;FileName = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + FilePart + #DQUOTE$
+  FileName = #PB_Compiler_Home + "PureLibraries\UserLibraries\" + FilePart  
+  FileDelete(FileName)
+
   ;Delete previous PureLibrariesMaker.log
   FileDelete("PureLibrariesMaker.log")
   
@@ -285,7 +286,7 @@ Procedure OBJCreate()
   Protected ASMFilename.s = #DQUOTE$ + FilePart + ".asm" + #DQUOTE$
   Protected OBJFileName.s = #DQUOTE$ + FilePart + ".obj" + #DQUOTE$
   
-  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\FAsm.exe", "" + ASMFilename + " " + OBJFileName, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\Fasm.exe", "" + ASMFilename + " " + OBJFileName + " -s log.txt", "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
     While ProgramRunning(Compiler)
       If AvailableProgramOutput(Compiler)
@@ -318,25 +319,30 @@ EndProcedure
 Procedure MakeStaticLib()  
   Protected Compiler
   Protected SourcePath.s      = #DQUOTE$ + FilePart + ".Desc" + #DQUOTE$
+  Protected OBJPath.s         = FilePart + ".obj" 
   Protected DestinationPath.s = #DQUOTE$ + #PB_Compiler_Home + "PureLibraries\UserLibraries\" + #DQUOTE$  ; + " /COMPRESSED /NOUNICODEWARNING "
   
-  Compiler = RunProgram(#PB_Compiler_Home + "sdk\LibraryMaker.exe ", SourcePath + " /TO " + DestinationPath, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
-  
-  If Compiler
-    While ProgramRunning(Compiler)
-      If AvailableProgramOutput(Compiler)
-        ConsoleLog(ReadProgramString(Compiler))
+  If FileSize(OBJPath) <> -1 
+    Compiler = RunProgram(#PB_Compiler_Home + "sdk\LibraryMaker.exe ", SourcePath + " /TO " + DestinationPath, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+    
+    If Compiler
+      While ProgramRunning(Compiler)
+        If AvailableProgramOutput(Compiler)
+          ConsoleLog(ReadProgramString(Compiler))
+        EndIf
+      Wend
+      CloseProgram(Compiler)
+      If ReadFile(0, "PureLibrariesMaker.log")
+        While Eof(0) = 0
+          ConsoleLog(ReadString(0))
+        Wend      
       EndIf
-    Wend
-    CloseProgram(Compiler)
-    If ReadFile(0, "PureLibrariesMaker.log")
-      While Eof(0) = 0
-        ConsoleLog(ReadString(0))
-      Wend      
+      ConsoleLog(m("successlib"))
+    Else
+      ConsoleLog(m("errorlib"))
     EndIf
-    ConsoleLog(m("successlib"))
   Else
-    ConsoleLog(m("errorlib"))
+    ConsoleLog(m("errorobj"))
   EndIf
 EndProcedure
 
@@ -373,8 +379,7 @@ Procedure.f AdjustFontSize(Size.l)
 EndProcedure
 
 Procedure FileDelete(FileName.s)
-  If ReadFile(0, FileName)
-    CloseFile(0)
+  If FileSize(FileName) <> -1
     ConsoleLog("Delete " + Filename + " ...")
     If Not DeleteFile(FileName, #PB_FileSystem_Force)
       ConsoleLog(m("errordelete") + " " + Filename)
@@ -387,7 +392,8 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; FirstLine = 39
+; CursorPosition = 388
+; FirstLine = 335
 ; Folding = ------
 ; EnableXP
 ; EnableAdmin
