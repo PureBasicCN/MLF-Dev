@@ -10,20 +10,20 @@
 ; Subsystem .... : none
 ; TargetOS ..... : Windows
 ; License ...... : ?
-; Link ......... : ?
+; Link ......... : https://github.com/MLF4PB/MLF-Alpha/archive/master.zip
 ; Description .. : Catalog Include to translate gui - text
 ;
 ;==============================================================================
 ; Changelog:
 ; 23, September 2017 : Header & German Text added by Bisonte
-; 24, Septemner 2017 : RUssian Text add by mestnyi
+; 24, Septemner 2017 : Russian Text add by mestnyi
 ;==============================================================================
 
 
 #MLF_MaxLanguage = 3 ; 0 Based (0,1,2,4)
 
 Global Title.s = "MLF"
-Global Version.s = "0.96.3 Alpha"
+Global Version.s = "0.98 Alpha"
 
 ; 0 = FR, 1 = EN, 2 = DE, 4 = RU
 Global Lang = 0
@@ -158,6 +158,14 @@ With Catalog()
   \Translate(3) = "Невозможно создать библиотеку." 
 EndWith 
 
+AddMapElement(Catalog(), "errorobj")
+With Catalog()
+  \Translate(0) = "Une erreur c'est produite durant la compilation du fichier assembleur."
+  \Translate(1) = "An error occurred during the compilation of the assembler file." 
+  \Translate(2) = "Beim Kompilieren der Assemblerdatei ist ein Fehler aufgetreten."
+  \Translate(3) = "To be defined" 
+EndWith 
+
 AddMapElement(Catalog(), "successlib")
 With Catalog()
   \Translate(0) = "Création de la librairie terminée."
@@ -198,7 +206,6 @@ Procedure.s GetCompilerProcessor()
   EndIf  
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 25
-; FirstLine = 15
+; CursorPosition = 18
 ; Folding = -
 ; EnableXP
