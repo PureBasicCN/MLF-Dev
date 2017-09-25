@@ -10,7 +10,7 @@
 ; Subsystem .... : none
 ; TargetOS ..... : Windows
 ; License ...... : ?
-; Link ......... : ?
+; Link ......... : https://github.com/MLF4PB/MLF-Alpha/archive/master.zip
 ; Description .. : Parse ASM (Extract dependancies & procedures and create DESC File)
 ;
 ;==============================================================================
@@ -364,8 +364,14 @@ Procedure Parse(Buffer.s)
   
   ;Finalyse
   If Finalyse = #True
+    ;Add flag 'Unicode' if a parameter is a string     
+    If FindString(EnumProcedures, "String") And Not FindString(ProcedureType, "Unicode")
+      ProcedureType + " | Unicode"
+    EndIf
+    
     ProcedureParameters + ProcedureParametersEnd + ")"
-    EnumProcedures + ProcedureParameters + " - Your IDE help description " + #CRLF$  + ProcedureType + #CRLF$ + #CRLF$
+    EnumProcedures + ProcedureParameters + " - Your IDE help description " + #CRLF$  +
+                     ProcedureType + #CRLF$ + #CRLF$
   EndIf
 EndProcedure
 
@@ -406,6 +412,6 @@ Procedure.s Normalize(Buffer.s)
 EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; Folding = -------
+; Folding = --------
 ; Markers = 62
 ; EnableXP
