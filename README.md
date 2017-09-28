@@ -18,16 +18,12 @@ The compile button creates an ASM and DESC file.
 _Le bouton compil crée un fichier ASM et DESC._
 
 The help for each of your procedures is automatically added. You have the possibility to modify the content.  
-
 Example: GetOSName, () - Returns the name of the operating system.  
+If this is the case, do not forget to click on the Save button.  
 
-If this is the case, do not forget to click on the Save button.
-
-_L'aide de chacune de vos procédures est automatiquement ajoutée. Vous avez la possibilité de modifier le contenu._
-
-_Example : GetOSName, () - Returns the name of the operating system._
-
-_Si c'est le cas n'oubliez pas de cliquer sur le bouton Sauver._
+_L'aide de chacune de vos procédures est automatiquement ajoutée. Vous avez la possibilité de modifier le contenu._  
+_Example : GetOSName, () - Returns the name of the operating system._  
+_Si c'est le cas n'oubliez pas de cliquer sur le bouton Sauver._  
 
 Finally, the Make Lib button creates the library in the "_Libraries\UserLibraries_" folder of the PureBasic installation folder.  
 _Pour finir, le bouton Make Lib va crée la librairie dans le dossier "Libraries\UserLibraries" du dossier d'installation de PureBasic._
