@@ -22,9 +22,6 @@
 
 #MLF_MaxLanguage = 3 ; 0 Based (0,1,2,4)
 
-Global Title.s = "MLF"
-Global Version.s = "0.98 Alpha"
-
 ; 0 = FR, 1 = EN, 2 = DE, 4 = RU
 Global Lang = 0
 
@@ -182,6 +179,23 @@ With Catalog()
   \Translate(3) = "Не удалось удалить файл" 
 EndWith 
 
+AddMapElement(Catalog(), "logclear")
+With Catalog()
+  \Translate(0) = "Effacer le rapport"
+  \Translate(1) = "Clear log"
+  \Translate(2) = "Berricht löschen"
+  \Translate(3) = "Удалить отчет" 
+EndWith 
+
+AddMapElement(Catalog(), "logcopy")
+With Catalog()
+  \Translate(0) = "Copier le rapport"
+  \Translate(1) = "Copy log"
+  \Translate(2) = "Berricht kopieren"
+  \Translate(3) = "Копия отчета" 
+EndWith 
+
+
 Procedure InitLang(Gadget)
   AddGadgetItem(Gadget, -1, "Français")
   AddGadgetItem(Gadget, -1, "English")
@@ -197,15 +211,8 @@ EndProcedure
 Procedure.s m(Key.s)
   ProcedureReturn Catalog(key)\Translate(Lang)
 EndProcedure
-
-Procedure.s GetCompilerProcessor()
-  If #PB_Compiler_Processor = #PB_Processor_x86
-    ProcedureReturn "(x86)"
-  Else
-    ProcedureReturn "(x64)"
-  EndIf  
-EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 18
+; CursorPosition = 210
+; FirstLine = 160
 ; Folding = -
 ; EnableXP

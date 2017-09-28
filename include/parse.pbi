@@ -15,41 +15,32 @@
 ;
 ;==============================================================================
 ; Changelog:
-; 23, September 2017 : BugFix - Deduplication by Gally
+; 27, September 2017 : Added help for each procedure.
 ;==============================================================================
 
 EnableExplicit
 
-Structure tabProcedure
-  sProcedure.s
-  sArgument.s
-  ssProcedureR.s
-EndStructure
-
+;
 Global EnumHeader.s, EnumDependancies.s, EnumProcedures.s, Finalyse.b
-Global ProcedureName.s
+Global ProcedureName.s, ProcedureHelp.s, cr = #True, n
 
 Declare   Analyse(ASMFileName.s)
-Declare   Parse(Buffer.s)
+Declare   Parse(Name.s, Buffer.s, Help.s)
 Declare.s Normalize(Buffer.s)
 
+;Analyse ASM file name
 Procedure Analyse(ASMFileName.s)
   Protected ASMContent.s, ASMCountDependancies, ASMLineStartDependancies = 7, ASMCurrentLine
   Protected DESCContent.s, DESCHelpFileName.s = "HelpFileName" 
-  Protected Buffer.s, Token
-  
-  Protected  ASMCode.s
-  
-  Protected.i i, iProcedure
-  Protected.s sSaves, sSArgs
-  Protected Dim tabSaveValue.tabProcedure(1)
-  Protected.s svalue = "1234567890"
-  
+  Protected Buffer.s, Token  
+   
   Structure NewProcedure
-    Name.s
+    Line.s
     ReturnValue.s
+    Name.s
+    Help.s
+    Public.b
   EndStructure
-  
   Protected NewList ASMExtract.NewProcedure()
   
   ;-Parse and create ASM file
@@ -92,6 +83,12 @@ Procedure Analyse(ASMFileName.s)
   
   
   ;-Compose DESC Header
+  
+  ;The commands available in a Pure Basic Library are described in a file, called 'LibraryName.Desc'
+  ;   Inside, you can put every commands, which langage you've
+  ;   used To code your library, And more. Every line beginning by a semi-column ';'
+  ;   is considered As a comment (like in PureBasic).
+  
   EnumHeader = "ASM" + #CRLF$   ; Langage used to code the library: ASM or C
   EnumHeader + "0" + #CRLF$     ; Number of windows DLL than the library need
   EnumHeader + "OBJ" + #CRLF$   ; Library type (Can be OBJ or LIB).  
@@ -117,82 +114,73 @@ Procedure Analyse(ASMFileName.s)
     CloseFile(0)
   EndIf
   
-  ;-Extract procedures 
+  ;-Extract procedures and sort by name
   If ReadFile(0, ASMFileName) 
     While Eof(0) = 0
       Buffer = ReadString(0)
       If FindString(Buffer, "; ProcedureDLL", 0, #PB_String_NoCase)
         AddElement(ASMExtract())
-        ASMExtract()\Name = Buffer
+        ASMExtract()\Line = Buffer
       EndIf
       If FindString(Buffer, "; ProcedureReturn", 0, #PB_String_NoCase)
         ASMExtract()\ReturnValue = Buffer
       EndIf
     Wend
     CloseFile(0)
-    SortStructuredList(ASMExtract(), #PB_Sort_Ascending, OffsetOf(NewProcedure\Name), TypeOf(NewProcedure\Name))
+    SortStructuredList(ASMExtract(), #PB_Sort_Descending, OffsetOf(NewProcedure\Line), #PB_String)
     
-    ASMCode = ""
-    ForEach(ASMExtract())
-      ASMCode + ASMExtract()\Name + #CRLF$
-      ASMCode + ASMExtract()\ReturnValue + #CRLF$
+    Buffer = ""
+    ForEach ASMExtract()
+      ProcedureName = StringField(StringField(ASMExtract()\Line, 3, " "), 1, "(")
+      cr = #True
+      While cr <> 0
+        cr = #False
+        For n = 1 To 10
+          If FindString(ReverseString(ProcedureName), Mid("1234567890", n,1))
+            ProcedureName = LSet(ProcedureName, Len(ProcedureName)-1)
+            cr = #True
+          EndIf
+        Next
+      Wend
+      ASMExtract()\Name = ProcedureName
+      
+      If ASMExtract()\Name <> Buffer
+        Buffer = ASMExtract()\Name
+        ASMExtract()\Public = #True
+      Else
+        ASMExtract()\Public = #False
+      EndIf
     Next
     
-    ;Deduplication by GallyHC 
-    For i = 1 To  CountString(ASMCode, #CRLF$)
-      Buffer = Trim(StringField(ASMCode, i, #CRLF$))
-      If FindString(Buffer, "; Procedure", 0, #PB_String_NoCase)
-        Buffer = ReplaceString(Buffer, "; Procedure", ";Procedure")
-        ;
-        Select LCase(StringField(StringField(Mid(Buffer, 2, Len(Buffer) - 1), 1, " "), 1, "."))
-          Case "procedure", "proceduredll"
-            ;
-            If sSaves <> #Null$ And LCase(Mid(StringField(StringField(Buffer, 2, " "), 1, "("), 1, Len(sSaves))) = LCase(sSaves) And CountString(svalue, LCase(Mid(StringField(StringField(Buffer, 2, " "), 1, "("), Len(sSaves) + 1, 1))) > 0
-              If iProcedure > 0
-                tabSaveValue(iProcedure)\sArgument = "(" + StringField(Mid(Buffer, FindString(Buffer, " ", 1), Len(Buffer) - FindString(Buffer, " ", 1) + 1), 2, "(")
-              EndIf
-            Else
-              iProcedure + 1
-              ReDim tabSaveValue.tabProcedure(iProcedure)
-              tabSaveValue(iProcedure)\sProcedure = Buffer
-              ;
-              sSaves = StringField(StringField(Buffer, 2, " "), 1, "(")
+    SortStructuredList(ASMExtract(), #PB_Sort_Ascending, OffsetOf(NewProcedure\Line), #PB_String)
+        
+    ;-Extract Help from PureBasic filename
+    ForEach(ASMExtract())
+      If ASMExtract()\Public = #True 
+        ReadFile(0, PBFileName)    
+        While Eof(0) = 0
+          Buffer = ReadString(0)
+          If FindString(Buffer, "ProcedureDLL") And  FindString(Buffer, ASMExtract()\Name) 
+            ProcedureHelp = Trim(StringField(Buffer, 2, ";-"))
+            If ProcedureHelp = ""
+              ProcedureHelp = "IDE help is not defined"
             EndIf
-            ;
-          Default
-            ;
-            tabSaveValue(iProcedure)\ssProcedureR = Buffer
-            ;    
-        EndSelect
-        ;  
-      EndIf
-    Next i
-    ;
-    For i=1 To iProcedure
-      Buffer = ""
-      
-      If tabSaveValue(i)\sArgument = #Null$
-        Buffer = tabSaveValue(i)\sProcedure
-      Else
-        Buffer = StringField(tabSaveValue(i)\sProcedure, 1, "(") + tabSaveValue(i)\sArgument
-      EndIf
-      Parse(Buffer)
-      
-      If tabSaveValue(i)\ssProcedureR <> #Null$
-        Buffer = tabSaveValue(i)\ssProcedureR
-        Parse(Buffer)
-      EndIf
-    Next i    
-    ;End deduplication (Thanks Gally)
+            ASMExtract()\Help = ProcedureHelp
+            Break 
+          EndIf
+        Wend
+        CloseFile(0)       
+        Parse(ASMExtract()\Name, ASMExtract()\Line, ASMExtract()\Help)
+      EndIf      
+    Next
     
-    ;Parse(#EOT$)
-    ;-Create DESC content filename
+    ;-Parsing is finish : Create DESC content filename
     DESCContent = EnumHeader + Str(ASMCountDependancies) + #CRLF$ + #CRLF$ +
                   "; " + Str(ASMCountDependancies) + " Dependancies " + #CRLF$ +
                   EnumDependancies + #CRLF$ +
                   "; Your help file" + #CRLF$ +
                   DESCHelpFileName + #CRLF$ + #CRLF$ +
-                  "; Procedure summary" + #CRLF$ +
+                  "; Procedure summary" + #CRLF$ + #CRLF$ +
                   EnumProcedures
     
     ;-Create DESC file
@@ -204,16 +192,17 @@ Procedure Analyse(ASMFileName.s)
 EndProcedure
 
 ;
-Procedure Parse(Buffer.s)  
+Procedure Parse(Name.s, Buffer.s, Help.s)  
   Protected ProcedureType.s       ;Type .s, .i, .... 
   Protected ProcedureParameters.s ;(Buffer$, Position.i
   Protected ProcedureParametersEnd.s ;]]])
-  Protected Variable.s, n
-  Protected DefaultValue.b        ;Variable has a default value
+  Protected Parameter.s, n
+  Protected DefaultValue.b        ;Parameter has a default value
   Protected CountParameters, CurrentParameter.i       
   
-  Buffer = Mid(Buffer, 2)
+  Protected Comment.s = Buffer
   
+  Buffer = Mid(Buffer, 3)
   Select LCase(StringField(StringField(Buffer, 1, " "), 1, "."))
     Case "proceduredll", "procedurecdll"
       
@@ -222,6 +211,9 @@ Procedure Parse(Buffer.s)
         Case "i", "l"  
           ProcedureType =  "Long | StdCall"
           
+        Case "f"
+          ProcedureType =  "Float | StdCall"
+          
         Case "s"
           ProcedureType = "String | StdCall | Unicode"
           
@@ -229,7 +221,7 @@ Procedure Parse(Buffer.s)
           ProcedureType = "Long | StdCall"
       EndSelect
       
-      ;-Procedure without variable 
+      ;-Procedure without Parameter 
       If CountString(Buffer, "()") = 1
         CountParameters = 0
       Else
@@ -238,40 +230,40 @@ Procedure Parse(Buffer.s)
       
       ;-Remove "ProcedureDLL"
       Buffer = Trim(Mid(Buffer, Len(Trim(StringField(Buffer, 1, " ")))+1))
-      ProcedureName = StringField(Buffer, 1, "(")
-      EnumProcedures + ProcedureName + ", "
       
-      ;-Parse each variable
+      EnumProcedures + comment + #CRLF$ + Name + ", "
+      
+      ;-Parse each Parameter
       
       ;Parameter type (Code : Coce done, ? : No test, Bug : Bad result)
       ; (Code ?) Byte: The parameter will be a byte (1 byte)
       ; (Cone ?) Word: The parameter will be a word (2 bytes)
-      ; (Cone Done) Long: The parameter will be a long (4 bytes)
+      ; (Code Done) Long: The parameter will be a long (4 bytes)
       ; (Code Done) String: The parameter will be a string (see below For an explaination of string handling)
       ; (Code ?) Quad: The parameter will be a quad (8 bytes)
-      ; (Code Bug) Float: The parameter will be a float (4 bytes)
+      ; (Code Done) Float: The parameter will be a float (4 bytes)
       ; (Code ?) Double: The parameter will be a double (8 bytes)
       ; Any: The parameter can be anything (the compiler won't check the type)
-      ; (Done Bug) Array: The parameter will be an Array. It will have To be passed like: Array()
+      ; (Code Bug) Array: The parameter will be an Array. It will have To be passed like: Array()
       ; LinkedList: The parameter will be an linkedlist. It will have To be passed like: List()
       
       ;Remove first bracket and last bracket
-      ProcedureParameters =  Mid(Buffer, FindString(Buffer, "("), Len(Buffer) -1)
-      Buffer = Mid(ProcedureParameters, 2, Len(ProcedureParameters) - 2)
+      ProcedureParameters =  Mid(Buffer, FindString(Buffer, "(") + 1)
+      Buffer = Mid(ProcedureParameters, 0, Len(ProcedureParameters) - 1)
       
       ProcedureParameters = "("
       
       If CountParameters <> 0
         For n = 1 To CountString(Buffer, ",") + 1
-          Variable = Trim(StringField(Buffer, n, ", "))
+          Parameter = Trim(StringField(Buffer, n, ", "))
           CurrentParameter + 1
           
-          If FindString(Variable, "=")
-            Variable = Trim(StringField(Variable, 1, "="))
+          If FindString(Parameter, "=")
+            Parameter = Trim(StringField(Parameter, 1, "="))
             DefaultValue = #True
           EndIf
           
-          Select StringField(Variable, 2, ".")
+          Select StringField(Parameter, 2, ".")
             Case "b"
               If DefaultValue
                 EnumProcedures + "[Byte], "
@@ -322,14 +314,14 @@ Procedure Parse(Buffer.s)
               EndIf
               
             Default
-              If FindString(Variable, "$")
+              If FindString(Parameter, "$")
                 If DefaultValue
                   EnumProcedures + "[String], "
                 Else
                   EnumProcedures + "String, "
                 EndIf
                 
-              ElseIf FindString(Variable, "Array", 0, #PB_String_NoCase)
+              ElseIf FindString(Parameter, "Array", 0, #PB_String_NoCase)
                 EnumProcedures + "Array, "
                 
               ElseIf Not FindString(ProcedureType, "none", 0, #PB_String_NoCase)
@@ -339,17 +331,17 @@ Procedure Parse(Buffer.s)
           
           If CurrentParameter = 1
             If DefaultValue
-              ProcedureParameters + "[" + Variable
+              ProcedureParameters + "[" + Parameter
               ProcedureParametersEnd + "]"
             Else
-              ProcedureParameters + Variable
+              ProcedureParameters + Parameter
             EndIf
           Else
             If DefaultValue 
-              ProcedureParameters + " [, " + Variable
+              ProcedureParameters + " [, " + Parameter
               ProcedureParametersEnd + "]"
             Else
-              ProcedureParameters + " , " + Variable
+              ProcedureParameters + " , " + Parameter
             EndIf
           EndIf
         Next
@@ -370,16 +362,17 @@ Procedure Parse(Buffer.s)
     EndIf
     
     ProcedureParameters + ProcedureParametersEnd + ")"
-    EnumProcedures + ProcedureParameters + " - Your IDE help description " + #CRLF$  +
+    
+    EnumProcedures + ProcedureParameters + " - " + Help + #CRLF$  +
                      ProcedureType + #CRLF$ + #CRLF$
   EndIf
 EndProcedure
 
 ;Format procedure by GallyHC
 Procedure.s Normalize(Buffer.s)
-  Define.i i
-  Define.b bblock, bspace
-  Define.s stemps, result
+  Protected i
+  Protected bblock.b, bspace.b
+  Protected stemps.s, result.s
   
   For i=1 To Len(Buffer)
     stemps = Mid(Buffer, i, 1)
@@ -412,6 +405,8 @@ Procedure.s Normalize(Buffer.s)
 EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 365
+; FirstLine = 353
 ; Folding = --------
-; Markers = 62
+; Markers = 53
 ; EnableXP
