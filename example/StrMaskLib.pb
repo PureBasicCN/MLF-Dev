@@ -1,4 +1,6 @@
-﻿ProcedureDLL.s StrMask(Value$)
+﻿;Example procedure with optional parameters 
+
+ProcedureDLL.s StrMask(Value$) ;-Transforms a string into monetary format. 
   ProcedureReturn Value$ + " €"
 EndProcedure
 
@@ -16,9 +18,9 @@ ProcedureDLL.s StrMask3(Value$, CurrencySymbol$ = "€", Negative.i = #True)
 EndProcedure
 
 
-
 ; IDE Options = PureBasic 5.60 (Windows - x86)
 ; ExecutableFormat = Shared dll
+; CursorPosition = 2
 ; Folding = -
 ; EnableXP
 ; Executable = mydll.dll

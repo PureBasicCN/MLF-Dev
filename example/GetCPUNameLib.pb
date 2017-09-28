@@ -1,4 +1,6 @@
-﻿ProcedureDLL.s GetCPUName()
+﻿;Test assembleur
+
+ProcedureDLL.s GetCPUName() ;-Get CPU name
   Protected sBuffer.s
   Protected Zeiger1.l, Zeiger2.l, Zeiger3.l, Zeiger4.l
  
@@ -49,5 +51,6 @@
   ProcedureReturn sBuffer
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
+; CursorPosition = 1
 ; Folding = -
 ; EnableXP
