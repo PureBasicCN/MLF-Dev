@@ -24,6 +24,15 @@ EnableExplicit
 Global EnumHeader.s, EnumDependancies.s, EnumProcedures.s, Finalyse.b
 Global ProcedureName.s, ProcedureHelp.s, cr = #True, n
 
+Structure NewProcedure
+  Line.s          ;Example : ; ProcedureDLL StoreMessage(Buffer.s)    
+  Name.s          ;Example : StoreMessage (Procedure Name)
+  ASMName.s       ;Example : _Procedure2   
+  Help.s          ;Example : Adds a message in the queue
+  ReturnValue.s   ;Example : ; ProcedureReturn Buffer
+  Public.b        
+EndStructure
+
 Declare   Analyse(ASMFileName.s)
 Declare   Parse(Name.s, Buffer.s, Help.s)
 Declare.s Normalize(Buffer.s)
@@ -31,58 +40,85 @@ Declare.s Normalize(Buffer.s)
 ;Analyse ASM file name
 Procedure Analyse(ASMFileName.s)
   Protected ASMContent.s, ASMCountDependancies, ASMLineStartDependancies = 7, ASMCurrentLine
-  Protected DESCContent.s, DESCHelpFileName.s = "HelpFileName" 
-  Protected Buffer.s, Token  
-   
-  Structure NewProcedure
-    Line.s
-    ReturnValue.s
-    Name.s
-    Help.s
-    Public.b
-  EndStructure
+  Protected DESCFileName.s, DESCContent.s, DESCHelpFileName.s = "HelpFileName" 
+  Protected Buffer.s, Token     
   Protected NewList ASMExtract.NewProcedure()
-  
-  ;-Parse and create ASM file
+    
+  ;- 1 Create ASM file 
   If ReadFile(0, ASMFileName) 
+    
+    ;- 1.0 ASM Procedures become public
     While Eof(0) = 0
       Buffer = ReadString(0)
+      
       If FindString(Buffer, "; procedure", 0, #PB_String_NoCase) And Not FindString(Buffer, "; procedurereturn", 0, #PB_String_NoCase)
         Token = #True
         
-        ;Format procedure        
+        ;Format procedure : ProcedureDLL    StoreMessage  ( Buffer.s ) => ; ProcedureDLL StoreMessage(Buffer.s)        
         Buffer = Normalize(Buffer)
         
+        AddElement(ASMExtract())
+        ASMExtract()\Line = Buffer
+        ASMExtract()\Name = StringField(StringField(Buffer, 3, " "), 1, "(")
+        
         ASMContent + Buffer + #CRLF$
+        
         ;Insert "public PB_YourProcedure()" and "PB_YourProcedure" after the comment line "; ProcedureDLL Yourprocedure"
         
-        ;Example
-        ; ; ProcedureDLL Add(x, y)
-        ; public PB_Add
-        ; PB_Add:
+        ;. Example of a PureBasic code
+        ;  ProcedureDLL Reset()
+        ;     Global n  = 10  
+        ;  EndProcedure
+        
+        ;. Assembler file after compilation
+        ;  ; ProcedureDLL Reset()
+        ;  _Procedure0:
+        ;  PS0=4
+        ;  ;Global n  = 10  
+        ;  MOV    dword [v_n],10
+        ;  ; EndProcedure        
+        
+        ;Extract real name of the procedure 
         ProcedureName = StringField(StringField(Buffer, 3, " "), 1, "(")
         
         ASMContent + "public PB_" + ProcedureName + #CRLF$
-        ASMContent + "PB_" + ProcedureName + ":"+ #CRLF$ 
+        ASMContent + "PB_" + ProcedureName + ":"+ #CRLF$
+        ;. Assembler file after updating procedure names
+        ;  ;  ProcedureDLL Reset()
+        ;  public PB_Reset
+        ;  PB_Reset:
+        ;  PS0=4
+        ;  ; Global n  = 10  
+        ;  MOV    dword [v_n],10
+        ;  ; EndProcedure
+        
       Else
         If Token = #False
           ASMContent + Buffer + #CRLF$
         Else
+          ASMExtract()\ASMName = RemoveString(Buffer, ":") ;Example _Procedure2
           Token = #False
         EndIf
       EndIf
     Wend
     CloseFile(0)
     
-    ;Create ASM file
+    ;- 1.1 Replaces all _ProcedureX with the real names of procedures 
+    ;Example CALL  _Procedure0 => CALL  PB_Reset
+    ForEach ASMExtract()
+      ASMContent = ReplaceString(ASMContent, ASMExtract()\ASMName, "PB_" + ASMExtract()\Name)   
+    Next
+        
+    ;- 1.2 Save new ASM file
+    ConsoleLog("Save the assembler file " + ASMFileName)
     If CreateFile(0, ASMFileName)
       WriteString(0, ASMContent)
       CloseFile(0)
     EndIf  
   EndIf
   
-  
-  ;-Compose DESC Header
+  ;-
+  ;- 2 Create DESC Header
   
   ;The commands available in a Pure Basic Library are described in a file, called 'LibraryName.Desc'
   ;   Inside, you can put every commands, which langage you've
@@ -97,7 +133,7 @@ Procedure Analyse(ASMFileName.s)
   EnumProcedures = ""           ; Enumeration of procedures.
   Finalyse = #False
   
-  ;-Extract and count dependancies (Number of PureBasic library needed by the library.)
+  ;- 2.0 Extract and count dependancies (Number of PureBasic library needed by the library.)
   If ReadFile(0, ASMFileName) 
     While Eof(0) = 0
       Buffer = ReadString(0)
@@ -114,7 +150,8 @@ Procedure Analyse(ASMFileName.s)
     CloseFile(0)
   EndIf
   
-  ;-Extract procedures and sort by name
+  ;- 2.1 Extract procedures from ASM file and sort by name
+  ClearList(ASMExtract())
   If ReadFile(0, ASMFileName) 
     While Eof(0) = 0
       Buffer = ReadString(0)
@@ -154,7 +191,7 @@ Procedure Analyse(ASMFileName.s)
     
     SortStructuredList(ASMExtract(), #PB_Sort_Ascending, OffsetOf(NewProcedure\Line), #PB_String)
         
-    ;-Extract Help from PureBasic filename
+    ;- 2.2 Extract IDE Help from PureBasic filename
     ForEach(ASMExtract())
       If ASMExtract()\Public = #True 
         ReadFile(0, PBFileName)    
@@ -174,7 +211,7 @@ Procedure Analyse(ASMFileName.s)
       EndIf      
     Next
     
-    ;-Parsing is finish : Create DESC content filename
+    ;- 2.3 Create DESC content filename
     DESCContent = EnumHeader + Str(ASMCountDependancies) + #CRLF$ + #CRLF$ +
                   "; " + Str(ASMCountDependancies) + " Dependancies " + #CRLF$ +
                   EnumDependancies + #CRLF$ +
@@ -183,16 +220,19 @@ Procedure Analyse(ASMFileName.s)
                   "; Procedure summary" + #CRLF$ + #CRLF$ +
                   EnumProcedures
     
-    ;-Create DESC file
-    If CreateFile(0,  GetFilePart(ASMFileName, #PB_FileSystem_NoExtension) + ".desc")
+    ;- 2.4 Save DESC file
+    DESCFileName = GetFilePart(ASMFileName, #PB_FileSystem_NoExtension) + ".desc"
+    ConsoleLog("Save description file  " + DESCFileName)
+    If CreateFile(0, DESCFileName)
       WriteString(0, DESCContent)
       CloseFile(0) 
     EndIf
   EndIf 
 EndProcedure
 
-;
+;-
 Procedure Parse(Name.s, Buffer.s, Help.s)  
+;- 3 Parse the parameters of each procedure
   Protected ProcedureType.s       ;Type .s, .i, .... 
   Protected ProcedureParameters.s ;(Buffer$, Position.i
   Protected ProcedureParametersEnd.s ;]]])
@@ -202,11 +242,12 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
   
   Protected Comment.s = Buffer
   
+  ConsoleLog("- Parse : " + Buffer)
   Buffer = Mid(Buffer, 3)
   Select LCase(StringField(StringField(Buffer, 1, " "), 1, "."))
     Case "proceduredll", "procedurecdll"
       
-      ;-Parse procedure type
+      ;- 3.0 Parse procedure type
       Select  StringField(StringField(Buffer, 1, " "), 2, ".")
         Case "i", "l"  
           ProcedureType =  "Long | StdCall"
@@ -221,19 +262,19 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
           ProcedureType = "Long | StdCall"
       EndSelect
       
-      ;-Procedure without Parameter 
+      ;- 3.1 Procedure without Parameter 
       If CountString(Buffer, "()") = 1
         CountParameters = 0
       Else
         CountParameters = CountString(Buffer, ",") + 1
       EndIf
       
-      ;-Remove "ProcedureDLL"
+      ;- 3.2 Remove "ProcedureDLL"
       Buffer = Trim(Mid(Buffer, Len(Trim(StringField(Buffer, 1, " ")))+1))
       
       EnumProcedures + comment + #CRLF$ + Name + ", "
       
-      ;-Parse each Parameter
+      ;- 3.3 Parse each Parameter
       
       ;Parameter type (Code : Coce done, ? : No test, Bug : Bad result)
       ; (Code ?) Byte: The parameter will be a byte (1 byte)
@@ -368,6 +409,7 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
   EndIf
 EndProcedure
 
+;-
 ;Format procedure by GallyHC
 Procedure.s Normalize(Buffer.s)
   Protected i
@@ -405,8 +447,7 @@ Procedure.s Normalize(Buffer.s)
 EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 365
-; FirstLine = 353
+; CursorPosition = 191
+; FirstLine = 157
 ; Folding = --------
-; Markers = 53
 ; EnableXP
