@@ -64,22 +64,23 @@ EndEnumeration
 
 ;Version
 Global Title.s = "MLF"
-Global Version.s = "1.00 Beta"
+Global Version.s = "1.10 Beta"
 
 ;Current PureBasic file
 Global PBFileName.s, PathPart.s, FilePart.s
 
 ;-Application Summary
 Declare   Start()                 ;Fonts, Window and Triggers
-Declare   LogMenu()
-Declare   LogEvent()
+Declare   LogMenu()               ;Log Popup Menu (Clear & Copy)
+Declare   LogEvent()              ;Log Events  
 Declare   ResetWindow()           ;Init and clear Gadget
-Declare   PBSelect()              ;Changed lang
-Declare   PBCompil()              ;Created ASM file, Parsed and modified ASM file and create description (DESC) file 
+Declare   PBSelect()              ;Select PureBasic file name
+Declare   PBCompil()              ;Created ASM file, Parsed and save ASM file and create description (DESC) file 
 Declare   OBJCreate()             ;Created OBJ file         
-Declare   DESCSave()              ;Saved DESC file if the user changes the source 
 Declare   MakeStaticLib()         ;Create User libray
 Declare   LibShowUserLib()        ;Show user library folder
+
+Declare   DESCSave()              ;Saved DESC file if the user changes the source 
 
 Declare   LangChange()            ;Changed lang (French, English, Deutch, Russian)
 Declare   ConsoleLog(Buffer.s)    ;Updated console log  
@@ -91,15 +92,15 @@ Declare   Exit()                  ;Exit
 IncludePath "include"
 IncludeFile "catalog.pbi"         ;Lang
 IncludeFile "parse.pbi"           ;Parse ASM (Extract dependancies and procedures and create DESC File)
-IncludeFile "media.pbi"     ;Application sounds (Error and Success)
+IncludeFile "media.pbi"           ;Media image and sound 
 IncludeFile "LockResize.pbi"      ;Automatically resize the elements of a form.
 
 Start()
 
 Procedure Start()  
   ;-Fonts
-  LoadFont(#FontGlobal, "", AdjustFontSize(9))
-  LoadFont(#FontH1, "", AdjustFontSize(10))
+  LoadFont(#FontGlobal, "", AdjustFontSize(10))
+  LoadFont(#FontH1, "", AdjustFontSize(11))
   SetGadgetFont(#PB_Default, FontID(#FontGlobal))
   
   ;-Window
@@ -131,9 +132,8 @@ Procedure Start()
   FrameGadget(#mfPBFrame, 5, 20, WindowWidth(#mf) - 15, 70, "")
   
   ;PureBasic File Name
-  TextGadget(#mfPBCodeName, 20, 50, WindowWidth(#mf) - 45, 22, "")
-  SetGadgetColor(#mfPBCodeName, #PB_Gadget_BackColor, RGB(169, 169, 169))
-    
+  ComboBoxGadget(#mfPBCodeName, 20, 50, WindowWidth(#mf) - 45, 22)
+  
   ;View console log
   ListViewGadget(#mfLog, 5, 130, WindowWidth(#mf) - 15, 400)
   SetGadgetColor(#mfLog, #PB_Gadget_BackColor, RGB(169, 169, 169))
@@ -168,7 +168,6 @@ Procedure Start()
   LockGadget(#mf, #mfPanel, #True, #True, #True, #True)
   LockGadget(#mf, #mfPBFrame, #True, #True, #True, #False)
   LockGadget(#mf, #mfPBCodeName, #True, #True, #True, #False)
-  ;LockGadget(#mf, #mfPBSelect, #False, #True, #True, #False)
   LockGadget(#mf, #mfLog, #True, #True, #True, #True)
   LockGadget(#mf, #mfASMName, #True, #True, #True, #False)
   LockGadget(#mf, #mfASMEdit, #True, #True, #True, #True)
@@ -179,6 +178,7 @@ Procedure Start()
   ;-Triggers
   BindGadgetEvent(#mfLang, @LangChange())           ;Change lang
   BindGadgetEvent(#mfPBSelect, @PBSelect())         ;Select PureBasic code
+  BindGadgetEvent(#mfPBCodeName, @PBSelect())       ;Select PureBasic code  
   BindGadgetEvent(#mfPBCompil, @PBCompil())         ;Create ASM file, Parsed and modified ASM file and create description (DESC) file 
   BindGadgetEvent(#mfLIBCreate, @OBJCreate())       ;Create OBJ file and User Libray
   BindGadgetEvent(#mfDESCUpdate, @DESCSave())       ;Save DESC file if the user changes the source
@@ -234,15 +234,25 @@ EndProcedure
 ;-
 ;Select PureBasic filename
 Procedure PBSelect()
+  Protected Selector = EventGadget()
   Protected PBPreviousFileName.s = PBFileName
   
-  PBFileName = OpenFileRequester(m("selpbfile"), "", "PureBasic file | *.pb;*.pbi", 0)  
-  
-  If PBFileName
+  If Selector = #mfPBSelect
+    PBFileName = OpenFileRequester(m("selpbfile"), "", "PureBasic file | *.pb;*.pbi", 0)  
+  Else
+    PBFileName = Trim(GetGadgetItemText(#mfPBCodeName, GetGadgetState(#mfPBCodeName)))
+  EndIf
+    
+  If PBFileName <> ""
     PathPart = GetPathPart(PBFileName)
     FilePart = GetFilePart(PBFileName, #PB_FileSystem_NoExtension)
     ResetWindow()    
-    SetGadgetText(#mfPBCodeName, " " + PBFileName)
+    
+    If Selector = #mfPBSelect
+      AddGadgetItem(#mfPBCodeName, 0, " " + PBFileName)
+      SetGadgetState(#mfPBCodeName, 0)
+    EndIf
+    
     DisableGadget(#mfPBCompil, #False)
     SetGadgetAttribute(#mfPBCompil, #PB_Button_Image, ImageID(PBCompil))
     ConsoleLog("Click the compile button.")
@@ -261,11 +271,11 @@ Procedure PBCompil()
   ;Delete previous PureBasic.asm file if exist
   FileDelete("PureBasic.asm")
   
-  ;Delete previous library 
+  ;Delete previous library if exist
   FileName = #PB_Compiler_Home + "PureLibraries\UserLibraries\" + FilePart  
   FileDelete(FileName)
 
-  ;Delete previous PureLibrariesMaker.log
+  ;Delete previous PureLibrariesMaker.log if exist
   FileDelete("PureLibrariesMaker.log")
   
   ;Delete YOUR previous ASM Files if exist
@@ -295,13 +305,13 @@ Procedure PBCompil()
     
     If Token
       FileName = FilePart + ".asm"
+               
       If Not RenameFile("PureBasic.asm", Filename)
-        ConsoleLog(m("libexist"))
         ConsoleLog(m("errordelete") + " " + Filename)
       Else
         ConsoleLog("Rename PureBasic.asm to " + FileName + " done." )       
         
-        ;Parse ASM (Extract dependancies & procedures and create DESC File)        
+        ;Extract dependancies & procedures from ASM file and create DESC File        
         Analyse(FileName)
         
         ;Init ASM Editor
@@ -325,13 +335,16 @@ Procedure PBCompil()
             AddGadgetItem(#mfDESCEdit, -1, ReadString(0))
           Wend
           CloseFile(0)
-          ConsoleLog("You can view the ASM and DESC sources before create your user library")
-          PlaySound(Success)
         EndIf
         
         DisableGadget(#mfLIBCreate, #False)
         SetGadgetAttribute(#mfLIBCreate, #PB_Button_Image, ImageID(LIBCompil))    
         DisableGadget(#mfDESCUpdate, #False)
+        
+        ConsoleLog("You can view the ASM and DESC sources before create your user library")
+        PlaySound(Success)
+
+        FileDelete("purebasic.exe")
       EndIf 
     Else
       PlaySound(Error)
@@ -346,7 +359,7 @@ Procedure OBJCreate()
   Protected ASMFilename.s = #DQUOTE$ + FilePart + ".asm" + #DQUOTE$
   Protected OBJFileName.s = #DQUOTE$ + FilePart + ".obj" + #DQUOTE$
   
-  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\Fasm.exe", "" + ASMFilename + " " + OBJFileName + " -s log.txt", "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\Fasm.exe", "" + ASMFilename + " " + OBJFileName, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
     While ProgramRunning(Compiler)
       If AvailableProgramOutput(Compiler)
@@ -360,24 +373,7 @@ Procedure OBJCreate()
   EndIf
 EndProcedure
 
-;Save DESC file if the user changes the source
-Procedure DESCSave()
-  Protected DESCFileName.s = FilePart + ".desc"
-  Protected DESCContent.s = GetGadgetText(#mfDESCEdit)
-  
-  If CreateFile(0, DESCFileName)
-    If WriteString(0, DESCContent)
-      ConsoleLog(m("successdesc"))
-      MessageRequester("Informaton", m("successdesc"))
-    Else
-      ConsoleLog(m("errordesc"))
-      MessageRequester("Informaton", m("errordesc"))
-    EndIf
-    CloseFile(0)
-  EndIf  
-EndProcedure
-
-;Make Static Lib (Use sdk\LibraryMaker.exe")
+;Make Static Lib : Use sdk\LibraryMaker.exe
 
 ;LibraryMaker can take several arguments in parameter To allow easy scripting:
 ; /ALL                : Process all the .desc files found in the source directory
@@ -422,6 +418,26 @@ EndProcedure
 Procedure LibShowUserLib()
   RunProgram("explorer.exe", #PB_Compiler_Home + "PureLibraries\UserLibraries", "")  
 EndProcedure
+
+;-
+;Save DESC file if the user changes the source
+Procedure DESCSave()
+  Protected DESCFileName.s = FilePart + ".desc"
+  Protected DESCContent.s = GetGadgetText(#mfDESCEdit)
+  
+  If CreateFile(0, DESCFileName)
+    If WriteString(0, DESCContent)
+      ConsoleLog(m("successdesc"))
+      MessageRequester("Informaton", m("successdesc"))
+    Else
+      ConsoleLog(m("errordesc"))
+      MessageRequester("Informaton", m("errordesc"))
+    EndIf
+    CloseFile(0)
+  EndIf  
+EndProcedure
+
+
 
 ;-
 ;-Tools
@@ -475,10 +491,10 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 126
-; FirstLine = 101
+; CursorPosition = 137
+; FirstLine = 137
 ; Folding = -------
-; Markers = 333
+; Markers = 240
 ; EnableXP
 ; EnableAdmin
 ; Executable = mlf.exe
