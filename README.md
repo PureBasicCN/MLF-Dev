@@ -31,3 +31,6 @@ _Pour finir, le bouton Make Lib va crée la librairie dans le dossier "Libraries
 ■ Restart compiler. (IDE : Menu Compiler -> Restart compiler)  
 _Redémarrer le compilateur. (IDE : Menu Compilateur -> Redémarrer le compilateur)_
 
+See the [Wiki](https://github.com/MLF4PB/MLF-Dev/wiki) for more information. 
+
+
