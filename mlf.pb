@@ -19,6 +19,7 @@
 ; 24, September 2017 : Catalog.pbi  - Russian Text add by mestnyi
 ; 24, September 2017 : Parse.pbi    - Add Normalise() Format procedure name + parameters by GallyHC
 ; 27, September 2017 : Parse.pbi    - Add toolbar and help for each procedure
+; 01, October 2017   : mlf.pb       - MLF command line File + pbcompil.b + libcreate.b 
 ;==============================================================================
 
 EnableExplicit
@@ -64,7 +65,7 @@ EndEnumeration
 
 ;Version
 Global Title.s = "MLF"
-Global Version.s = "1.10 Beta"
+Global Version.s = "1.20 Beta"
 
 ;Current PureBasic file
 Global PBFileName.s, PathPart.s, FilePart.s
@@ -190,6 +191,23 @@ Procedure Start()
   
   BindEvent(#PB_Event_CloseWindow, @Exit())         ;Exit
   
+  ;-MLF is launched on the command line
+  If CountProgramParameters() 
+    PBFileName = Trim(ProgramParameter(0))
+    AddGadgetItem(#mfPBCodeName, 0, PBFileName)
+    SetGadgetState(#mfPBCodeName, 0)
+    ConsoleLog(Str(CountProgramParameters()))
+    ConsoleLog("Receiving the file " + PBFileName)
+    PBSelect()
+    
+    If Val(ProgramParameter(1)) = #True
+      If PBCompil() And Val(ProgramParameter(2)) = #True
+        MakeStaticLib()
+      EndIf
+    EndIf
+  EndIf
+  
+  ;Loop
   Repeat : WaitWindowEvent() : ForEver
 EndProcedure
 
@@ -351,6 +369,7 @@ Procedure PBCompil()
       MessageRequester("MLF", Buffer)
     EndIf 
   EndIf
+  ProcedureReturn Token
 EndProcedure
 
 ;Create OBJ File : Use fasm.exe
@@ -491,10 +510,10 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 137
-; FirstLine = 137
+; CursorPosition = 67
+; FirstLine = 39
 ; Folding = -------
-; Markers = 240
+; Markers = 258
 ; EnableXP
 ; EnableAdmin
 ; Executable = mlf.exe
