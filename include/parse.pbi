@@ -158,8 +158,10 @@ Procedure Analyse(ASMFileName.s)
       If FindString(Buffer, "; ProcedureDLL", 0, #PB_String_NoCase)
         AddElement(ASMExtract())
         ASMExtract()\Line = Buffer
-      EndIf
-      If FindString(Buffer, "; ProcedureReturn", 0, #PB_String_NoCase)
+        Token = #True
+      EndIf 
+      If FindString(Buffer, "; ProcedureReturn", 0, #PB_String_NoCase) And Token = #True
+     ;   AddElement(ASMExtract())
         ASMExtract()\ReturnValue = Buffer
       EndIf
     Wend
@@ -446,8 +448,8 @@ Procedure.s Normalize(Buffer.s)
   ProcedureReturn result
 EndProcedure
 
-; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 191
-; FirstLine = 157
+; IDE Options = PureBasic 5.61 (Windows - x86)
+; CursorPosition = 163
+; FirstLine = 130
 ; Folding = --------
 ; EnableXP
