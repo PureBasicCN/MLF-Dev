@@ -161,7 +161,6 @@ Procedure Analyse(ASMFileName.s)
         Token = #True
       EndIf 
       If FindString(Buffer, "; ProcedureReturn", 0, #PB_String_NoCase) And Token = #True
-     ;   AddElement(ASMExtract())
         ASMExtract()\ReturnValue = Buffer
       EndIf
     Wend
@@ -448,8 +447,8 @@ Procedure.s Normalize(Buffer.s)
   ProcedureReturn result
 EndProcedure
 
-; IDE Options = PureBasic 5.61 (Windows - x86)
+; IDE Options = PureBasic 5.60 (Windows - x86)
 ; CursorPosition = 163
-; FirstLine = 130
+; FirstLine = 142
 ; Folding = --------
 ; EnableXP
