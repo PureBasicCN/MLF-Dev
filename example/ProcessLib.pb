@@ -17,8 +17,18 @@ ProcedureDLL Sub(x, y) ;- Simple Sub
   ProcedureReturn x-y
 EndProcedure
 
-
+;Test
+; ;Call AttachProcess()
+; Debug "Start" 
+; Delay(2000)
+; Debug Add(2, 3)
+; Delay(2000)
+; Debug Sub(20, 10)
+; Delay(2000)
+; Debug "fin"
+; Delay(2000)
+;Call DetachProcess()
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 14
+; CursorPosition = 3
 ; Folding = -
 ; EnableXP
