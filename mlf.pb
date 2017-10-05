@@ -76,7 +76,7 @@ EndEnumeration
 
 ;Version
 Global Title.s = "MLF"
-Global Version.s = "1.30 Beta"
+Global Version.s = "1.31 Beta"
 
 ;Current PureBasic file
 Global PBFileName.s, PathPart.s, FilePart.s
@@ -330,8 +330,7 @@ Procedure PBCompil()
   ConsoleLog("Waiting for compile ...")
   
   ;-Create resident file if check enable  
-  If GetGadgetState(#mfRSEnable) = #True 
-    
+  If GetGadgetState(#mfRSEnable) = #PB_Checkbox_Checked   
     ;Delete previous resident if exist
     FileName = #PB_Compiler_Home + "Residents\" + FilePart + ".res" 
     FileDelete(FileName)
@@ -374,7 +373,9 @@ Procedure PBCompil()
     CloseProgram(Compiler)
     
     If Token
-      CopyFile(filepart + ".res", #PB_Compiler_Home + "\Residents\" + FilePart + ".res")
+      If GetGadgetState(#mfRSEnable) = #PB_Checkbox_Checked   
+        CopyFile(filepart + ".res", #PB_Compiler_Home + "\Residents\" + FilePart + ".res")
+      EndIf
       
       FileName = FilePart + ".asm"
       
@@ -591,8 +592,8 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 78
-; FirstLine = 54
+; CursorPosition = 333
+; FirstLine = 330
 ; Folding = ---------
 ; Markers = 283
 ; EnableXP
