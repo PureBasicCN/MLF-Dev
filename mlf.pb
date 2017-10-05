@@ -22,6 +22,7 @@
 ; 01, October 2017   : mlf.pb       - MLF command line File + pbcompil.b + libcreate.b 
 ; 04, October 2017   : mlf.pb       - Add Resident file creation
 ;                                   - Saved ASM file if the user changes the source
+; 06, October 2017   : mlf          - Add lib process folder
 ;==============================================================================
 
 EnableExplicit
@@ -76,10 +77,13 @@ EndEnumeration
 
 ;Version
 Global Title.s = "MLF"
-Global Version.s = "1.31 Beta"
+Global Version.s = "1.32 Beta"
 
 ;Current PureBasic file
 Global PBFileName.s, PathPart.s, FilePart.s
+
+;MLF Folder
+Global MLFFolder.s = GetCurrentDirectory()
 
 ;-Application Summary
 Declare   Start()                 ;Fonts, Window and Triggers
@@ -308,6 +312,10 @@ EndProcedure
 Procedure PBCompil()
   Protected Compiler, Buffer.s, FileName.s, Token.b
   
+  ;Create compilation work space
+  CreateDirectory(FilePart)
+  SetCurrentDirectory(FilePart)
+  MessageRequester("","")
   ;Delete previous PureBasic.exe file if exist
   FileDelete("PureBasic.exe")
   
@@ -435,6 +443,8 @@ Procedure PBCompil()
       MessageRequester("MLF", Buffer)
     EndIf 
   EndIf
+  
+  SetCurrentDirectory(MLFFolder)
   ProcedureReturn Token
 EndProcedure
 
@@ -443,6 +453,8 @@ Procedure OBJCreate()
   Protected Compiler
   Protected ASMFilename.s = #DQUOTE$ + FilePart + ".asm" + #DQUOTE$
   Protected OBJFileName.s = #DQUOTE$ + FilePart + ".obj" + #DQUOTE$
+  
+  SetCurrentDirectory(FilePart)
   
   Compiler = RunProgram(#PB_Compiler_Home + "Compilers\Fasm.exe", "" + ASMFilename + " " + OBJFileName, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
@@ -497,6 +509,7 @@ Procedure MakeStaticLib()
     ConsoleLog(m("errorobj"))
     PlaySound(Error)
   EndIf
+  SetCurrentDirectory(MLFFolder)
 EndProcedure
 
 ;Show User libraries
@@ -592,10 +605,10 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 333
-; FirstLine = 330
+; CursorPosition = 532
+; FirstLine = 463
 ; Folding = ---------
-; Markers = 283
+; Markers = 287
 ; EnableXP
 ; EnableAdmin
 ; Executable = mlf.exe
