@@ -15,7 +15,7 @@
 ;
 ;==============================================================================
 ; Credit sound http://freesound.org
-; Credit image Oma (English forum)
+; Credit image Oma (English forum) and GallyHC (French Forum)
 ;==============================================================================
 
 UsePNGImageDecoder()
@@ -25,12 +25,11 @@ Global PBCompild  = CatchImage(#PB_Any, ?pbcompild)
 Global LIBCompil  = CatchImage(#PB_Any, ?libcompil)
 Global LIBCompild = CatchImage(#PB_Any, ?libcompild)
 Global LIBView    = CatchImage(#PB_Any, ?libview)
+Global Grip       = CatchImage(#PB_Any, ?Grip)
 
 InitSound()
-
 Global Error    = CatchSound(#PB_Any, ?error)
 Global Success  = CatchSound(#PB_Any, ?success)
-
 
 DataSection
   ;Image 
@@ -52,6 +51,9 @@ DataSection
   libview:    ;Image view all lib 
   IncludeBinary "image/findfile.png"
   
+  grip:       :;Resize window
+  IncludeBinary "image/grip.png"
+  
   ;Sound
   error:
   IncludeBinary "sound/error.wav"
@@ -61,6 +63,6 @@ DataSection
   
 EndDataSection
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 61
-; FirstLine = 9
+; CursorPosition = 63
+; FirstLine = 14
 ; EnableXP

@@ -21,8 +21,9 @@
 EnableExplicit
 
 ;
-Global EnumHeader.s, EnumDependancies.s, EnumProcedures.s, Finalyse.b
+Global EnumHeader.s, EnumDependancies.s, EnumProcess.s, EnumProcedures.s, Finalyse.b
 Global ProcedureName.s, ProcedureHelp.s, cr = #True, n
+Global CountPublicProcedure.i
 
 Structure NewProcedure
   Line.s          ;Example : ; ProcedureDLL StoreMessage(Buffer.s)    
@@ -130,6 +131,7 @@ Procedure Analyse(ASMFileName.s)
   EnumHeader + "OBJ" + #CRLF$   ; Library type (Can be OBJ or LIB).  
   
   EnumDependancies = ""         ; Enumeration of dependencies.
+  EnumProcess = ""              ; Enumeration attach & detach process
   EnumProcedures = ""           ; Enumeration of procedures.
   Finalyse = #False
   
@@ -191,8 +193,24 @@ Procedure Analyse(ASMFileName.s)
     Next
     
     SortStructuredList(ASMExtract(), #PB_Sort_Ascending, OffsetOf(NewProcedure\Line), #PB_String)
-        
-    ;- 2.2 Extract IDE Help from PureBasic filename
+    
+    CountPublicProcedure = ListSize(ASMExtract())
+    
+    ;- 2.2 Search AttachProcess() and DetachProcess()
+    ForEach(ASMExtract())
+      Select LCase(ASMExtract()\Name)
+        Case "attachprocess"
+          EnumProcess + ASMExtract()\Name + #CRLF$ + "InitFunction" + #CRLF$ + #CRLF$
+          ASMExtract()\Public = #False
+          
+        Case "detachprocess"
+          EnumProcess + ASMExtract()\Name + #CRLF$ + "EndFunction" + #CRLF$
+          ASMExtract()\Public = #False
+      EndSelect
+    Next
+
+    
+    ;- 2.3 Extract IDE Help from PureBasic filename
     ForEach(ASMExtract())
       If ASMExtract()\Public = #True 
         ReadFile(0, PBFileName)    
@@ -211,23 +229,26 @@ Procedure Analyse(ASMFileName.s)
         Parse(ASMExtract()\Name, ASMExtract()\Line, ASMExtract()\Help)
       EndIf      
     Next
-    
-    ;- 2.3 Create DESC content filename
+            
+    ;- 2.4 Create DESC content filename
     DESCContent = EnumHeader + Str(ASMCountDependancies) + #CRLF$ + #CRLF$ +
                   "; " + Str(ASMCountDependancies) + " Dependancies " + #CRLF$ +
                   EnumDependancies + #CRLF$ +
                   "; Your help file" + #CRLF$ +
                   DESCHelpFileName + #CRLF$ + #CRLF$ +
-                  "; Procedure summary" + #CRLF$ + #CRLF$ +
+                  "; Procedure summary" + #CRLF$ +
+                  EnumProcess + #CRLF$  +
                   EnumProcedures
     
-    ;- 2.4 Save DESC file
-    DESCFileName = GetFilePart(ASMFileName, #PB_FileSystem_NoExtension) + ".desc"
-    ConsoleLog("Save description file  " + DESCFileName)
-    If CreateFile(0, DESCFileName)
-      WriteString(0, DESCContent)
-      CloseFile(0) 
-    EndIf
+    ;- 2.5 Save DESC file
+    If CountPublicProcedure <> 0
+      DESCFileName = GetFilePart(ASMFileName, #PB_FileSystem_NoExtension) + ".desc"
+      ConsoleLog("Save description file  " + DESCFileName)
+      If CreateFile(0, DESCFileName)
+        WriteString(0, DESCContent)
+        CloseFile(0) 
+      EndIf
+    EndIf 
   EndIf 
 EndProcedure
 
@@ -240,8 +261,7 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
   Protected Parameter.s, n
   Protected DefaultValue.b        ;Parameter has a default value
   Protected CountParameters, CurrentParameter.i       
-  
-  Protected Comment.s = Buffer
+  Protected CommentProcedure.s = Buffer
   
   ConsoleLog("- Parse : " + Buffer)
   Buffer = Mid(Buffer, 3)
@@ -263,17 +283,17 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
           ProcedureType = "Long | StdCall"
       EndSelect
       
-      ;- 3.1 Procedure without Parameter 
-      If CountString(Buffer, "()") = 1
+      ;- 3.1 Procedure without Parameter
+      If CountString(Buffer, LCase(Name)+"()") = #True
         CountParameters = 0
       Else
-        CountParameters = CountString(Buffer, ",") + 1
+        CountParameters = CountString(Buffer, ", ") + 1
       EndIf
       
       ;- 3.2 Remove "ProcedureDLL"
       Buffer = Trim(Mid(Buffer, Len(Trim(StringField(Buffer, 1, " ")))+1))
       
-      EnumProcedures + comment + #CRLF$ + Name + ", "
+      EnumProcedures + CommentProcedure + #CRLF$ + Name + ", "
       
       ;- 3.3 Parse each Parameter
       
@@ -287,19 +307,17 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
       ; (Code ?) Double: The parameter will be a double (8 bytes)
       ; Any: The parameter can be anything (the compiler won't check the type)
       ; (Code Bug) Array: The parameter will be an Array. It will have To be passed like: Array()
-      ; LinkedList: The parameter will be an linkedlist. It will have To be passed like: List()
+      ; Code Done) LinkedList: The parameter will be an linkedlist. It will have To be passed like: List()
       
       ;Remove first bracket and last bracket
       ProcedureParameters =  Mid(Buffer, FindString(Buffer, "(") + 1)
       Buffer = Mid(ProcedureParameters, 0, Len(ProcedureParameters) - 1)
-      
       ProcedureParameters = "("
       
       If CountParameters <> 0
         For n = 1 To CountString(Buffer, ",") + 1
           Parameter = Trim(StringField(Buffer, n, ", "))
           CurrentParameter + 1
-          
           If FindString(Parameter, "=")
             Parameter = Trim(StringField(Parameter, 1, "="))
             DefaultValue = #True
@@ -364,10 +382,21 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
                 EndIf
                 
               ElseIf FindString(Parameter, "Array", 0, #PB_String_NoCase)
-                EnumProcedures + "Array, "
+                If DefaultValue
+                  EnumProcedures + "[Array], "
+                Else
+                  EnumProcedures + "Array, "
+                EndIf
                 
-              ElseIf Not FindString(ProcedureType, "none", 0, #PB_String_NoCase)
-                EnumProcedures + "Long, "
+              ElseIf FindString(Parameter, "List", 0, #PB_String_NoCase)
+                If DefaultValue
+                  EnumProcedures + "[LinkedList], "
+                Else
+                  EnumProcedures + "LinkedList, "
+                EndIf
+                  
+              ;ElseIf Not FindString(ProcedureType, "none", 0, #PB_String_NoCase)
+              ;  EnumProcedures + "Long, "
               EndIf
           EndSelect
           
@@ -448,7 +477,7 @@ Procedure.s Normalize(Buffer.s)
 EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 163
-; FirstLine = 142
+; CursorPosition = 397
+; FirstLine = 354
 ; Folding = --------
 ; EnableXP

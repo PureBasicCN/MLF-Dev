@@ -36,7 +36,7 @@ With Catalog()
   \Translate(0) = Title + " version " + Version + " - " + " Création d'une bibliothèque de fonctions utilisateur"
   \Translate(1) = Title + " version " + Version + " - " + " Creating a user library"
   \Translate(2) = Title + " version " + Version + " - " + " Erstelle eine Bibliothek"
-  \Translate(3) = Title + " версия " + Version + " - " + " Создание пользовательской библиотеки" 
+  \Translate(3) = Title + " версия "  + Version + " - " + " Создание пользовательской библиотеки" 
 EndWith 
 
 AddMapElement(Catalog(), "welcome")
@@ -123,6 +123,22 @@ With Catalog()
   \Translate(3) = "Сохранить" 
 EndWith 
 
+AddMapElement(Catalog(), "errorasm")
+With Catalog()
+  \Translate(0) = "Impossible de créer le fichier ASM."
+  \Translate(1) = "Failed to create ASM file." 
+  \Translate(2) = "Erstellung der ASM Datei fehlgeschlagen."
+  \Translate(3) = "Не удалось создать файл ASM."  
+EndWith 
+
+AddMapElement(Catalog(), "successasm")
+With Catalog()
+  \Translate(0) = "Création du fichier le description, terminée."
+  \Translate(1) = "Create description file completed."
+  \Translate(2) = "Erstellung der ASM Datei."
+  \Translate(3) = "Создание файла ASM."   
+EndWith 
+
 AddMapElement(Catalog(), "errordesc")
 With Catalog()
   \Translate(0) = "Impossible de créer le fichier de description."
@@ -152,7 +168,7 @@ With Catalog()
   \Translate(0) = "Impossible de créer la librairie."
   \Translate(1) = "Unable to create library." 
   \Translate(2) = "Konnte Bibliothek nicht erstellen."
-  \Translate(3) = "Невозможно создать библиотеку." 
+  \Translate(3) = "Удалите библиотеку, если она существует, и перезапустите компилятор." 
 EndWith 
 
 AddMapElement(Catalog(), "errorobj")
@@ -212,7 +228,7 @@ Procedure.s m(Key.s)
   ProcedureReturn Catalog(key)\Translate(Lang)
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 210
-; FirstLine = 160
+; CursorPosition = 38
+; FirstLine = 18
 ; Folding = -
 ; EnableXP
