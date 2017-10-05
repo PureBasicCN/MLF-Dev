@@ -211,6 +211,21 @@ With Catalog()
   \Translate(3) = "Копия отчета" 
 EndWith 
 
+AddMapElement(Catalog(), "information")
+With Catalog()
+  \Translate(0) = "MLF : Information"
+  \Translate(1) = "MLF : Information"
+  \Translate(2) = "MLF : Informationen"
+  \Translate(3) = "MLF : информация" 
+EndWith 
+
+AddMapElement(Catalog(), "residentexist")
+With Catalog()
+  \Translate(0) = "Confirmez vous la suppression du resident"
+  \Translate(1) = "Confirm the deletion of the resident"
+  \Translate(2) = "Bestätigen Sie das Löschen des Residenten"
+  \Translate(3) = "Подтвердить удаление резидента " 
+EndWith 
 
 Procedure InitLang(Gadget)
   AddGadgetItem(Gadget, -1, "Français")
@@ -228,7 +243,7 @@ Procedure.s m(Key.s)
   ProcedureReturn Catalog(key)\Translate(Lang)
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 38
-; FirstLine = 18
+; CursorPosition = 224
+; FirstLine = 189
 ; Folding = -
 ; EnableXP
