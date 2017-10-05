@@ -322,7 +322,6 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
             Parameter = Trim(StringField(Parameter, 1, "="))
             DefaultValue = #True
           EndIf
-          
           Select StringField(Parameter, 2, ".")
             Case "b"
               If DefaultValue
@@ -397,6 +396,13 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
                   
               ;ElseIf Not FindString(ProcedureType, "none", 0, #PB_String_NoCase)
               ;  EnumProcedures + "Long, "
+              Else
+                If DefaultValue
+                  EnumProcedures + "[Long], "
+                Else
+                  EnumProcedures + "Long, "
+                EndIf
+                
               EndIf
           EndSelect
           
@@ -477,7 +483,7 @@ Procedure.s Normalize(Buffer.s)
 EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 397
-; FirstLine = 354
+; CursorPosition = 324
+; FirstLine = 321
 ; Folding = --------
 ; EnableXP
