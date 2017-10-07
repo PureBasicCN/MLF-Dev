@@ -276,6 +276,9 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
         Case "f"
           ProcedureType =  "Float | StdCall"
           
+        Case "q"
+          ProcedureType = "Quad | StdCall"
+          
         Case "s"
           ProcedureType = "String | StdCall | Unicode"
           
@@ -483,7 +486,7 @@ Procedure.s Normalize(Buffer.s)
 EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 324
-; FirstLine = 321
+; CursorPosition = 279
+; FirstLine = 255
 ; Folding = --------
 ; EnableXP
