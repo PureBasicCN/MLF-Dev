@@ -8,12 +8,12 @@
   <section name="data">
     <explorer view="include\" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2017-10-06 00:14" user="Eric" host="FALSAM"/>
+    <lastopen date="2017-10-07 23:16" user="Eric" host="FALSAM"/>
   </section>
   <section name="files">
     <file name="include\catalog.pbi">
       <config load="1" scan="1" panel="1" warn="1" lastopen="1" panelstate="++"/>
-      <fingerprint md5="ff0ce5fca74c35f7bf94637abe526912"/>
+      <fingerprint md5="76f8bebba37143755d0f0d4a8ce16a11"/>
     </file>
     <file name="include\LockResize.pbi">
       <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="++"/>
@@ -29,14 +29,14 @@
     </file>
     <file name="mlf.pb">
       <config load="1" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
-      <fingerprint md5="7cbafe92cb05aa5f4e3e786b7eee5963"/>
+      <fingerprint md5="6d4ccf8e7daad2745d033739b6d854a4"/>
     </file>
   </section>
   <section name="targets">
     <target name="Cible par défaut" enabled="1" default="1">
       <inputfile value="mlf.pb"/>
       <outputfile value=""/>
-      <executable value="Resident\createresident.exe"/>
+      <executable value="..\..\Applications\MLF\MLF.exe"/>
       <options xpskin="1" admin="1" debug="1"/>
       <icon enable="1">purebasic.ico</icon>
     </target>
