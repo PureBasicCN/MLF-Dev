@@ -287,8 +287,10 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
       EndSelect
       
       ;- 3.1 Procedure without Parameter
-      If CountString(Buffer, LCase(Name)+"()") = #True
+      Debug Buffer + " " + Name
+      If CountString(Buffer, Name+"()") = #True
         CountParameters = 0
+        Debug "passe"
       Else
         CountParameters = CountString(Buffer, ", ") + 1
       EndIf
@@ -486,7 +488,7 @@ Procedure.s Normalize(Buffer.s)
 EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 279
-; FirstLine = 255
+; CursorPosition = 290
+; FirstLine = 285
 ; Folding = --------
 ; EnableXP
