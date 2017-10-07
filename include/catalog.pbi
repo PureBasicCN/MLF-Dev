@@ -20,7 +20,7 @@
 ;==============================================================================
 
 
-#MLF_MaxLanguage = 3 ; 0 Based (0,1,2,4)
+#MLF_MaxLanguage = 4 ; 0 Based (0,1,2,4,5)
 
 ; 0 = FR, 1 = EN, 2 = DE, 4 = RU,5 = CN
 Global Lang = 0
@@ -37,7 +37,7 @@ With Catalog()
   \Translate(1) = Title + " version " + Version + " - " + " Creating a user library"
   \Translate(2) = Title + " version " + Version + " - " + " Erstelle eine Bibliothek"
   \Translate(3) = Title + " версия "  + Version + " - " + " Создание пользовательской библиотеки" 
-  \Translate(4) = Title + " version " + Version + " - " + " 创建用户库"
+  \Translate(4) = Title + " 版本 " + Version + " - " + " 创建用户库"
 EndWith 
 
 AddMapElement(Catalog(), "welcome")
@@ -83,7 +83,7 @@ With Catalog()
   \Translate(1) = "Compil"
   \Translate(2) = "Kompiliere"
   \Translate(3) = "Компилировать" 
-  \Translate(1) = "编译"
+  \Translate(4) = "编译"
 EndWith 
 
 AddMapElement(Catalog(), "libcreate")
@@ -92,7 +92,7 @@ With Catalog()
   \Translate(1) = "Create library"
   \Translate(2) = "Erstelle Bibliothek"
   \Translate(3) = "Создать библиотеку" 
-  \Translate(1) = "创建库"
+  \Translate(4) = "创建库"
 EndWith 
 
 AddMapElement(Catalog(), "libshow")
@@ -101,7 +101,7 @@ With Catalog()
   \Translate(1) = "Show libraries"
   \Translate(2) = "Zeige Bibliotheken"
   \Translate(3) = "Показать библиотеки" 
-  \Translate(1) = "显示库"
+  \Translate(4) = "显示库"
 EndWith 
 
 
@@ -269,8 +269,7 @@ EndProcedure
 Procedure.s m(Key.s)
   ProcedureReturn Catalog(key)\Translate(Lang)
 EndProcedure
-; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 224
-; FirstLine = 189
+; IDE Options = PureBasic 5.44 LTS (Windows - x86)
+; CursorPosition = 22
 ; Folding = -
 ; EnableXP
