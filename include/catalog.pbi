@@ -47,6 +47,15 @@ With Catalog()
   \Translate(3) = "Добро пожаловать на борт." 
 EndWith 
 
+
+AddMapElement(Catalog(), "run")
+With Catalog()
+  \Translate(0) = "Cliquez sur le bouton de compilation."
+  \Translate(1) = "Click the compile button."
+  \Translate(2) = "Klicken Sie auf die Schaltfläche zum Kompilieren."
+  \Translate(3) = "Нажмите на кнопку компилировать." 
+EndWith 
+
 ;Panel : Select code PureBasic to be compiled
 AddMapElement(Catalog(), "pancompil")
 With Catalog()
@@ -93,7 +102,7 @@ With Catalog()
   \Translate(0) = "Voir bibliothéques"
   \Translate(1) = "Show libraries"
   \Translate(2) = "Zeige Bibliotheken"
-  \Translate(3) = "Показать библиотеки" 
+  \Translate(3) = "Просмотр библиотек" 
 EndWith 
 
 
@@ -136,7 +145,7 @@ With Catalog()
   \Translate(0) = "Création du fichier le description, terminée."
   \Translate(1) = "Create description file completed."
   \Translate(2) = "Erstellung der ASM Datei."
-  \Translate(3) = "Создание файла ASM."   
+  \Translate(3) = "Создание файла ASM, завершено."   
 EndWith 
 
 AddMapElement(Catalog(), "errordesc")
@@ -144,7 +153,7 @@ With Catalog()
   \Translate(0) = "Impossible de créer le fichier de description."
   \Translate(1) = "Failed to create description file." 
   \Translate(2) = "Erstellung der DESC Datei fehlgeschlagen."
-  \Translate(3) = "Не удалось создать файл описания." 
+  \Translate(3) = "Не удалось создать файл DESC." 
 EndWith 
 
 AddMapElement(Catalog(), "successdesc")
@@ -152,7 +161,7 @@ With Catalog()
   \Translate(0) = "Création du fichier le description, terminée."
   \Translate(1) = "Create description file completed."
   \Translate(2) = "Erstellung der DESC Datei."
-  \Translate(3) = "Создать файл описания."   
+  \Translate(3) = "Создание файла DESC, завершено."   
 EndWith 
 
 AddMapElement(Catalog(), "libexist")
@@ -168,7 +177,7 @@ With Catalog()
   \Translate(0) = "Impossible de créer la librairie."
   \Translate(1) = "Unable to create library." 
   \Translate(2) = "Konnte Bibliothek nicht erstellen."
-  \Translate(3) = "Удалите библиотеку, если она существует, и перезапустите компилятор." 
+  \Translate(3) = "Невозможно создать библиотеку." 
 EndWith 
 
 AddMapElement(Catalog(), "errorobj")
@@ -176,7 +185,7 @@ With Catalog()
   \Translate(0) = "Une erreur c'est produite durant la compilation du fichier assembleur."
   \Translate(1) = "An error occurred during the compilation of the assembler file." 
   \Translate(2) = "Beim Kompilieren der Assemblerdatei ist ein Fehler aufgetreten."
-  \Translate(3) = "To be defined" 
+  \Translate(3) = "Произошла ошибка во время компиляции файла ассемблера" 
 EndWith 
 
 AddMapElement(Catalog(), "successlib")
@@ -184,7 +193,7 @@ With Catalog()
   \Translate(0) = "Création de la librairie terminée."
   \Translate(1) = "Create library completed."
   \Translate(2) = "Bibliothek erstellt."
-  \Translate(3) = "Создание библиотеки завершена." 
+  \Translate(3) = "Создание библиотеки, завершено." 
 EndWith 
 
 AddMapElement(Catalog(), "errordelete")
@@ -200,7 +209,7 @@ With Catalog()
   \Translate(0) = "Effacer le rapport"
   \Translate(1) = "Clear log"
   \Translate(2) = "Berricht löschen"
-  \Translate(3) = "Удалить отчет" 
+  \Translate(3) = "Удалить отчёт" 
 EndWith 
 
 AddMapElement(Catalog(), "logcopy")
@@ -208,7 +217,7 @@ With Catalog()
   \Translate(0) = "Copier le rapport"
   \Translate(1) = "Copy log"
   \Translate(2) = "Berricht kopieren"
-  \Translate(3) = "Копия отчета" 
+  \Translate(3) = "Копия отчёта" 
 EndWith 
 
 AddMapElement(Catalog(), "information")
@@ -224,7 +233,7 @@ With Catalog()
   \Translate(0) = "Confirmez vous la suppression du resident"
   \Translate(1) = "Confirm the deletion of the resident"
   \Translate(2) = "Bestätigen Sie das Löschen des Residenten"
-  \Translate(3) = "Подтвердить удаление резидента " 
+  \Translate(3) = "Подтвердить удаление резидента" 
 EndWith 
 
 Procedure InitLang(Gadget)
@@ -243,7 +252,7 @@ Procedure.s m(Key.s)
   ProcedureReturn Catalog(key)\Translate(Lang)
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 224
-; FirstLine = 189
+; CursorPosition = 252
+; FirstLine = 200
 ; Folding = -
 ; EnableXP

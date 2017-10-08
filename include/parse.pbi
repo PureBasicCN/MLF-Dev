@@ -270,9 +270,18 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
       
       ;- 3.0 Parse procedure type
       Select  StringField(StringField(Buffer, 1, " "), 2, ".")
+        Case "b"
+          ProcedureType =  "Byte | StdCall"
+          
         Case "i", "l"  
           ProcedureType =  "Long | StdCall"
           
+        Case "f"
+          ProcedureType =  "Float | StdCall"
+          
+        Case "d"
+          ProcedureType =  "Double | StdCall"
+             
         Case "f"
           ProcedureType =  "Float | StdCall"
           
@@ -281,6 +290,9 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
           
         Case "s"
           ProcedureType = "String | StdCall | Unicode"
+          
+        Case "w"
+          ProcedureType = "Word | StdCall"
           
         Default
           ProcedureType = "Long | StdCall"
@@ -301,16 +313,16 @@ Procedure Parse(Name.s, Buffer.s, Help.s)
       ;- 3.3 Parse each Parameter
       
       ;Parameter type (Code : Coce done, ? : No test, Bug : Bad result)
-      ; (Code ?) Byte: The parameter will be a byte (1 byte)
-      ; (Cone ?) Word: The parameter will be a word (2 bytes)
-      ; (Code Done) Long: The parameter will be a long (4 bytes)
-      ; (Code Done) String: The parameter will be a string (see below For an explaination of string handling)
-      ; (Code ?) Quad: The parameter will be a quad (8 bytes)
-      ; (Code Done) Float: The parameter will be a float (4 bytes)
-      ; (Code ?) Double: The parameter will be a double (8 bytes)
+      ; Byte: The parameter will be a byte (1 byte)
+      ; Word: The parameter will be a word (2 bytes)
+      ; Long: The parameter will be a long (4 bytes)
+      ; String: The parameter will be a string (see below For an explaination of string handling)
+      ; Quad: The parameter will be a quad (8 bytes)
+      ; Float: The parameter will be a float (4 bytes)
+      ; Double: The parameter will be a double (8 bytes)
       ; Any: The parameter can be anything (the compiler won't check the type)
-      ; (Code Bug) Array: The parameter will be an Array. It will have To be passed like: Array()
-      ; Code Done) LinkedList: The parameter will be an linkedlist. It will have To be passed like: List()
+      ; Array: The parameter will be an Array. It will have To be passed like: Array()
+      ; LinkedList: The parameter will be an linkedlist. It will have To be passed like: List()
       
       ;Remove first bracket and last bracket
       ProcedureParameters =  Mid(Buffer, FindString(Buffer, "(") + 1)
@@ -486,7 +498,7 @@ Procedure.s Normalize(Buffer.s)
 EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 289
-; FirstLine = 289
+; CursorPosition = 336
+; FirstLine = 284
 ; Folding = --------
 ; EnableXP
