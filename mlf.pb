@@ -77,7 +77,7 @@ EndEnumeration
 
 ;Version
 Global Title.s = "MLF"
-Global Version.s = "1.34 Beta"
+Global Version.s = "1.35 Beta"
 
 ;Current PureBasic file
 Global PBFileName.s, PathPart.s, FilePart.s
@@ -302,7 +302,7 @@ Procedure PBSelect()
     
     DisableGadget(#mfPBCompil, #False)
     SetGadgetAttribute(#mfPBCompil, #PB_Button_Image, ImageID(PBCompil))
-    ConsoleLog("Click the compile button.")
+    ConsoleLog(m("run"))
   Else
     PBFileName = PBPreviousFileName
   EndIf
@@ -616,7 +616,7 @@ Procedure Exit()
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
 ; CursorPosition = 79
-; FirstLine = 48
+; FirstLine = 54
 ; Folding = ----------
 ; Markers = 287
 ; EnableXP
