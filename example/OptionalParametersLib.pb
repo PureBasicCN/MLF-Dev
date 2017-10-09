@@ -1,7 +1,7 @@
 ﻿;Example procedure with optional parameters 
 DeclareDLL.s StrMask3(Value$, CurrencySymbol$ = "€", Negative.i = #True)
 
-ProcedureDLL.s StrokeP(Value$) ;-Transforms a string into monetary format. 
+ProcedureDLL.s StrMask(Value$) ;-Transforms a string into monetary format. 
   ProcedureReturn StrMask3(Value$)
 EndProcedure
 
@@ -21,7 +21,7 @@ EndProcedure
 
 ; IDE Options = PureBasic 5.60 (Windows - x86)
 ; ExecutableFormat = Shared dll
-; CursorPosition = 7
+; CursorPosition = 8
 ; Folding = -
 ; EnableXP
 ; Executable = mydll.dll
