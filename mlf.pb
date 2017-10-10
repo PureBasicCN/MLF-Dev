@@ -77,7 +77,7 @@ EndEnumeration
 
 ;Version
 Global Title.s = "MLF"
-Global Version.s = "1.35 Beta"
+Global Version.s = "1.36 Beta"
 
 ;Current PureBasic file
 Global PBFileName.s, PathPart.s, FilePart.s
@@ -375,7 +375,7 @@ Procedure PBCompil()
   EndIf
   
   ;-Create ASM
-  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED " , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
+  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED" , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
     Token = #True
     While ProgramRunning(Compiler)
@@ -533,6 +533,7 @@ Procedure ASMSave()
   Protected ASMFileName.s = FilePart + ".asm"
   Protected ASMContent.s = GetGadgetText(#mfASMEdit)
   
+  SetCurrentDirectory(FilePart)
   If CreateFile(0, ASMFileName)
     If WriteString(0, ASMContent)
       ConsoleLog(m("successasm"))
@@ -543,6 +544,7 @@ Procedure ASMSave()
     EndIf
     CloseFile(0)
   EndIf  
+  SetCurrentDirectory(MLFFolder)  
 EndProcedure
 
 ;Save DESC file if the user changes the source
@@ -550,6 +552,7 @@ Procedure DESCSave()
   Protected DESCFileName.s = FilePart + ".desc"
   Protected DESCContent.s = GetGadgetText(#mfDESCEdit)
   
+  SetCurrentDirectory(FilePart)
   If CreateFile(0, DESCFileName)
     If WriteString(0, DESCContent)
       ConsoleLog(m("successdesc"))
@@ -560,6 +563,7 @@ Procedure DESCSave()
     EndIf
     CloseFile(0)
   EndIf  
+  SetCurrentDirectory(MLFFolder)
 EndProcedure
 
 ;-
@@ -616,7 +620,7 @@ Procedure Exit()
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
 ; CursorPosition = 79
-; FirstLine = 54
+; FirstLine = 69
 ; Folding = ----------
 ; Markers = 287
 ; EnableXP
