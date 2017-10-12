@@ -77,7 +77,7 @@ EndEnumeration
 
 ;Version
 Global Title.s = "MLF"
-Global Version.s = "1.32 Beta"
+Global Version.s = "1.36 Beta"
 
 ;Current PureBasic file
 Global PBFileName.s, PathPart.s, FilePart.s
@@ -116,12 +116,12 @@ IncludeFile "LockResize.pbi"      ;Automatically resize the elements of a form.
 Start()
 
 Procedure Start()  
-  ;-Fonts
+  ;Fonts
   LoadFont(#FontGlobal, "", AdjustFontSize(10))
   LoadFont(#FontH1, "", AdjustFontSize(11))
   SetGadgetFont(#PB_Default, FontID(#FontGlobal))
   
-  ;-Window
+  ;Window
   UseLockGadget()
   OpenWindow(#mf, 0, 0, 800, 650, "", #PB_Window_SystemMenu|#PB_Window_ScreenCentered|#PB_Window_SizeGadget)
   WindowBounds(#mf, 390, 400, #PB_Ignore, #PB_Ignore)
@@ -188,7 +188,7 @@ Procedure Start()
   LangChange()  ;Displays window labels
   ResetWindow() ;Clear gadgets
   
-  ;-Resize gadget (Window, Gadget, Left, Top, Right, Bottom)
+  ;Resize gadget (Window, Gadget, Left, Top, Right, Bottom)
   LockGadget(#mf, #mfLang, #False, #True, #True, #False)
   LockGadget(#mf, #mfPanel, #True, #True, #True, #True)
   LockGadget(#mf, #mfPBFrame, #True, #True, #True, #False)
@@ -204,7 +204,7 @@ Procedure Start()
   LockGadget(#mf, #mfGrip1, #False, #False, #True, #True) 
   LockGadget(#mf, #mfGrip2, #False, #False, #True, #True) 
   
-  ;-Triggers
+  ;Triggers
   BindGadgetEvent(#mfLang, @LangChange())           ;Change lang
   BindGadgetEvent(#mfPBSelect, @PBSelect())         ;Select PureBasic code
   BindGadgetEvent(#mfPBCodeName, @PBSelect())       ;Select PureBasic code  
@@ -258,7 +258,7 @@ Procedure ResetWindow()
   DisableGadget(#mfDESCSave, #True)
 EndProcedure
 
-;- Log Menu
+;Log Menu
 Procedure LogMenu()
   DisplayPopupMenu(0, WindowID(0))   
 EndProcedure
@@ -302,7 +302,7 @@ Procedure PBSelect()
     
     DisableGadget(#mfPBCompil, #False)
     SetGadgetAttribute(#mfPBCompil, #PB_Button_Image, ImageID(PBCompil))
-    ConsoleLog("Click the compile button.")
+    ConsoleLog(m("run"))
   Else
     PBFileName = PBPreviousFileName
   EndIf
@@ -315,7 +315,7 @@ Procedure PBCompil()
   ;Create compilation work space
   CreateDirectory(FilePart)
   SetCurrentDirectory(FilePart)
-  MessageRequester("","")
+  
   ;Delete previous PureBasic.exe file if exist
   FileDelete("PureBasic.exe")
   
@@ -337,34 +337,45 @@ Procedure PBCompil()
   ;Compile PB (Create resident if enable and ASM) 
   ConsoleLog("Waiting for compile ...")
   
-  ;-Create resident file if check enable  
+  ;-Create RESIDENT  
   If GetGadgetState(#mfRSEnable) = #PB_Checkbox_Checked   
     ;Delete previous resident if exist
     FileName = #PB_Compiler_Home + "Residents\" + FilePart + ".res" 
-    FileDelete(FileName)
     
-    Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /RESIDENT " + FilePart + ".res" + #DQUOTE$, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)   
-    
-    If Compiler
+    If FileSize(FileName) <> -1 ;File exist
+      If MessageRequester(m("information"), m("residentexist") + #CRLF$ + FileName, #PB_MessageRequester_YesNo | #PB_MessageRequester_Warning) = #PB_MessageRequester_Yes
+        FileDelete(FileName)
+        Token = #True
+      Else
+        Token = #False
+      EndIf
+    Else
       Token = #True
-      While ProgramRunning(Compiler)
-        If AvailableProgramOutput(Compiler)
-          Buffer = ReadProgramString(Compiler)
-          If FindString(Buffer, "Error")
-            Token = #False
+    EndIf
+    
+    If Token = #True
+      Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /RESIDENT " + FilePart + ".res" + #DQUOTE$, "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)   
+      
+      If Compiler
+        Token = #True
+        While ProgramRunning(Compiler)
+          If AvailableProgramOutput(Compiler)
+            Buffer = ReadProgramString(Compiler)
+            If FindString(Buffer, "Error")
+              Token = #False
+            EndIf
+            If Not Bool(FindString(Buffer, "***") Or FindString(Buffer, "PureBasic"))        
+              ConsoleLog(Buffer)
+            EndIf          
           EndIf
-          If Not Bool(FindString(Buffer, "***") Or FindString(Buffer, "PureBasic"))        
-            ConsoleLog(Buffer)
-          EndIf          
-        EndIf
-      Wend
-      CloseProgram(Compiler)
-    EndIf 
-  EndIf 
+        Wend
+        CloseProgram(Compiler)
+      EndIf 
+    EndIf
+  EndIf
   
-  ;- Create ASM
-  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED " , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)    
-  
+  ;-Create ASM
+  Compiler = RunProgram(#PB_Compiler_Home + "Compilers\pbcompiler.exe", #DQUOTE$ + PBFileName + #DQUOTE$ + " /COMMENTED" , "", #PB_Program_Open | #PB_Program_Read | #PB_Program_Hide)
   If Compiler
     Token = #True
     While ProgramRunning(Compiler)
@@ -440,10 +451,9 @@ Procedure PBCompil()
       EndIf
     Else
       PlaySound(Error)
-      MessageRequester("MLF", Buffer)
+      MessageRequester(m("information"), Buffer)
     EndIf 
   EndIf
-  
   SetCurrentDirectory(MLFFolder)
   ProcedureReturn Token
 EndProcedure
@@ -523,16 +533,18 @@ Procedure ASMSave()
   Protected ASMFileName.s = FilePart + ".asm"
   Protected ASMContent.s = GetGadgetText(#mfASMEdit)
   
+  SetCurrentDirectory(FilePart)
   If CreateFile(0, ASMFileName)
     If WriteString(0, ASMContent)
       ConsoleLog(m("successasm"))
-      MessageRequester("Informaton", m("successasm"))
+      MessageRequester(m("informaton"), m("successasm"))
     Else
       ConsoleLog(m("errorasm"))
-      MessageRequester("Informaton", m("errorasm"))
+      MessageRequester(m("informaton"), m("errorasm"))
     EndIf
     CloseFile(0)
   EndIf  
+  SetCurrentDirectory(MLFFolder)  
 EndProcedure
 
 ;Save DESC file if the user changes the source
@@ -540,16 +552,18 @@ Procedure DESCSave()
   Protected DESCFileName.s = FilePart + ".desc"
   Protected DESCContent.s = GetGadgetText(#mfDESCEdit)
   
+  SetCurrentDirectory(FilePart)
   If CreateFile(0, DESCFileName)
     If WriteString(0, DESCContent)
       ConsoleLog(m("successdesc"))
-      MessageRequester("Informaton", m("successdesc"))
+      MessageRequester(m("informaton"), m("successdesc"))
     Else
       ConsoleLog(m("errordesc"))
-      MessageRequester("Informaton", m("errordesc"))
+      MessageRequester(m("informaton"), m("errordesc"))
     EndIf
     CloseFile(0)
   EndIf  
+  SetCurrentDirectory(MLFFolder)
 EndProcedure
 
 ;-
@@ -605,9 +619,9 @@ Procedure Exit()
   End
 EndProcedure
 ; IDE Options = PureBasic 5.60 (Windows - x86)
-; CursorPosition = 532
-; FirstLine = 463
-; Folding = ---------
+; CursorPosition = 79
+; FirstLine = 69
+; Folding = ----------
 ; Markers = 287
 ; EnableXP
 ; EnableAdmin
